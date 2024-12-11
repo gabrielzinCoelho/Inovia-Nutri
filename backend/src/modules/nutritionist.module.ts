@@ -15,5 +15,6 @@ import { CreateNutritionistService } from 'src/services/create-nutritionist.serv
   ],
   controllers: [CreateNutritionistController],
   providers: [CreateNutritionistService],
+  exports: [MongooseModule],
 })
 export class NutritionistModule {}
