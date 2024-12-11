@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { ConflictException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { Nutritionist } from 'src/schemas/nutritionist.schema'
@@ -27,7 +27,9 @@ export class CreateNutritionistService {
     })
 
     if (nutritionistWithSameEmail)
-      throw new Error('Nutritionist already exists.')
+      throw new ConflictException(
+        'Nutritionist with same email already exists.',
+      )
 
     const password_hash = await hash(password, 6)
 
