@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common'
 import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Env, envSchema } from './env'
 import { MongooseModule } from '@nestjs/mongoose'
+import { NutritionistModule } from './module/nutritionist.module'
 
 const configModuleValidationEnv = ConfigModule.forRoot({
   validate: (env) => envSchema.parse(env),
@@ -17,7 +18,7 @@ const mongooseModule = MongooseModule.forRootAsync({
 })
 
 @Module({
-  imports: [configModuleValidationEnv, mongooseModule],
+  imports: [configModuleValidationEnv, mongooseModule, NutritionistModule],
   controllers: [],
   providers: [],
 })
