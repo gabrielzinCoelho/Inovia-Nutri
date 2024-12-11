@@ -1,4 +1,5 @@
-import { Body, Controller, HttpCode, Post } from '@nestjs/common'
+import { Body, Controller, HttpCode, Post, UsePipes } from '@nestjs/common'
+import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe'
 import { CreateNutritionistService } from 'src/services/create-nutritionist.service'
 import { z } from 'zod'
 
@@ -16,8 +17,9 @@ export class CreateNutritionistController {
 
   @Post()
   @HttpCode(201)
+  @UsePipes(new ZodValidationPipe(createNutritionistBodySchema))
   async handle(@Body() body: CreateNutritionistBodySchema) {
-    const { name, email, password } = createNutritionistBodySchema.parse(body)
+    const { name, email, password } = body
 
     const nutritionist = await this.createNutritionistService.execute({
       name,
