@@ -3,6 +3,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config'
 import { Env, envSchema } from './env'
 import { MongooseModule } from '@nestjs/mongoose'
 import { NutritionistModule } from './modules/nutritionist.module'
+import { AuthModule } from './modules/auth.module'
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { NutritionistModule } from './modules/nutritionist.module'
       }),
     }),
     NutritionistModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
