@@ -1,19 +1,18 @@
 import { Injectable } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { PassportStrategy } from '@nestjs/passport'
+import { IsNotEmpty } from 'class-validator'
 import { ExtractJwt, Strategy } from 'passport-jwt'
-import { Env } from 'src/env'
-import { z } from 'zod'
+import { EnvSchema } from 'src/env'
 
-const tokenSchema = z.object({
-  sub: z.string(),
-})
-
-export type TokenSchema = z.infer<typeof tokenSchema>
+export class TokenPayloadDto {
+  @IsNotEmpty()
+  sub: string
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
-  constructor(config: ConfigService<Env, true>) {
+  constructor(config: ConfigService<EnvSchema, true>) {
     const jwtSecret = config.get('JWT_SECRET', { infer: true })
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
@@ -22,7 +21,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     })
   }
 
-  async validate(payload: TokenSchema) {
-    return tokenSchema.parse(payload)
+  async validate(payload: TokenPayloadDto) {
+    return payload
   }
 }

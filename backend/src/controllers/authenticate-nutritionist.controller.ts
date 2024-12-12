@@ -5,23 +5,22 @@ import {
   Post,
   UseGuards,
   UsePipes,
+  ValidationPipe,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
+import { IsEmail, MinLength } from 'class-validator'
 import { CurrentUser } from 'src/auth/current-user.decorator'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
-import { TokenSchema } from 'src/auth/jwt-strategy'
-import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe'
+import { TokenPayloadDto } from 'src/auth/jwt-strategy'
 import { AuthenticateNutritionistService } from 'src/services/authenticate-nutritionist.service'
-import { z } from 'zod'
 
-const authenticateNutritionistBodySchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(5),
-})
+class AuthenticateNutritionistPayloadDto {
+  @IsEmail()
+  email: string
 
-type AuthenticateNutritionistBodySchema = z.infer<
-  typeof authenticateNutritionistBodySchema
->
+  @MinLength(5)
+  password: string
+}
 
 @Controller('/sessions')
 export class AuthenticateNutritionistController {
@@ -32,8 +31,8 @@ export class AuthenticateNutritionistController {
 
   @Post()
   @HttpCode(200)
-  @UsePipes(new ZodValidationPipe(authenticateNutritionistBodySchema))
-  async handle(@Body() body: AuthenticateNutritionistBodySchema) {
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async handle(@Body() body: AuthenticateNutritionistPayloadDto) {
     const { email, password } = body
 
     const nutritionist = await this.authenticateNutritionistService.execute({
@@ -50,7 +49,7 @@ export class AuthenticateNutritionistController {
 
   @UseGuards(JwtAuthGuard)
   @Post('/validateToken')
-  async validate(@CurrentUser() nutritionistPayload: TokenSchema) {
+  async validate(@CurrentUser() nutritionistPayload: TokenPayloadDto) {
     return nutritionistPayload
   }
 }

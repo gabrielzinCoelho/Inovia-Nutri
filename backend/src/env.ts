@@ -1,9 +1,15 @@
-import { z } from 'zod'
+import { Type } from 'class-transformer'
+import { IsInt, IsNotEmpty, IsOptional } from 'class-validator'
 
-export const envSchema = z.object({
-  PORT: z.coerce.number().optional().default(3333),
-  DATABASE_URL: z.string().url(),
-  JWT_SECRET: z.string(),
-})
+export class EnvSchema {
+  @IsOptional()
+  @IsInt()
+  @Type(() => Number)
+  PORT: number = 3333
 
-export type Env = z.infer<typeof envSchema>
+  @IsNotEmpty()
+  DATABASE_URL: string
+
+  @IsNotEmpty()
+  JWT_SECRET: string
+}

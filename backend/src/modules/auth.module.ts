@@ -4,7 +4,7 @@ import { JwtModule } from '@nestjs/jwt'
 import { PassportModule } from '@nestjs/passport'
 import { JwtStrategy } from 'src/auth/jwt-strategy'
 import { AuthenticateNutritionistController } from 'src/controllers/authenticate-nutritionist.controller'
-import { Env } from 'src/env'
+import { EnvSchema } from 'src/env'
 import { NutritionistModule } from './nutritionist.module'
 import { AuthenticateNutritionistService } from 'src/services/authenticate-nutritionist.service'
 
@@ -14,7 +14,7 @@ import { AuthenticateNutritionistService } from 'src/services/authenticate-nutri
     JwtModule.registerAsync({
       inject: [ConfigService],
       global: true,
-      useFactory(config: ConfigService<Env, true>) {
+      useFactory(config: ConfigService<EnvSchema, true>) {
         const jwtSecret = config.get('JWT_SECRET', { infer: true })
         return {
           signOptions: {

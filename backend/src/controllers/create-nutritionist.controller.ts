@@ -1,15 +1,24 @@
-import { Body, Controller, HttpCode, Post, UsePipes } from '@nestjs/common'
-import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe'
+import {
+  Body,
+  Controller,
+  HttpCode,
+  Post,
+  UsePipes,
+  ValidationPipe,
+} from '@nestjs/common'
+import { IsEmail, IsNotEmpty, MinLength } from 'class-validator'
 import { CreateNutritionistService } from 'src/services/create-nutritionist.service'
-import { z } from 'zod'
 
-const createNutritionistBodySchema = z.object({
-  name: z.string(),
-  email: z.string().email(),
-  password: z.string().min(5),
-})
+class CreateNutritionistDto {
+  @IsNotEmpty()
+  name: string
 
-type CreateNutritionistBodySchema = z.infer<typeof createNutritionistBodySchema>
+  @IsEmail()
+  email: string
+
+  @MinLength(5)
+  password: string
+}
 
 @Controller('/nutritionists')
 export class CreateNutritionistController {
@@ -17,8 +26,8 @@ export class CreateNutritionistController {
 
   @Post()
   @HttpCode(201)
-  @UsePipes(new ZodValidationPipe(createNutritionistBodySchema))
-  async handle(@Body() body: CreateNutritionistBodySchema) {
+  @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
+  async handle(@Body() body: CreateNutritionistDto) {
     const { name, email, password } = body
 
     const nutritionist = await this.createNutritionistService.execute({
