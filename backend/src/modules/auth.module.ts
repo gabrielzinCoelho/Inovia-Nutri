@@ -19,6 +19,7 @@ import { AuthenticateNutritionistService } from 'src/services/authenticate-nutri
         return {
           signOptions: {
             algorithm: 'HS256',
+            expiresIn: '1h',
           },
           secret: jwtSecret,
         }

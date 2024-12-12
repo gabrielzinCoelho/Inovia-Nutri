@@ -7,8 +7,8 @@ import {
   UsePipes,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
-import { AuthGuard } from '@nestjs/passport'
 import { CurrentUser } from 'src/auth/current-user.decorator'
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { TokenSchema } from 'src/auth/jwt-strategy'
 import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe'
 import { AuthenticateNutritionistService } from 'src/services/authenticate-nutritionist.service'
@@ -48,7 +48,7 @@ export class AuthenticateNutritionistController {
     return { token }
   }
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(JwtAuthGuard)
   @Post('/validateToken')
   async validate(@CurrentUser() nutritionistPayload: TokenSchema) {
     return nutritionistPayload
