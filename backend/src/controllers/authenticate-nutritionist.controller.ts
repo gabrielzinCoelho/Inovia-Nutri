@@ -8,6 +8,8 @@ import {
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { AuthGuard } from '@nestjs/passport'
+import { CurrentUser } from 'src/auth/current-user.decorator'
+import { TokenSchema } from 'src/auth/jwt-strategy'
 import { ZodValidationPipe } from 'src/pipes/zod-validation.pipe'
 import { AuthenticateNutritionistService } from 'src/services/authenticate-nutritionist.service'
 import { z } from 'zod'
@@ -40,7 +42,7 @@ export class AuthenticateNutritionistController {
     })
 
     const token = this.jwt.sign({
-      sub: nutritionist.name,
+      sub: nutritionist['_id'],
     })
 
     return { token }
@@ -48,7 +50,7 @@ export class AuthenticateNutritionistController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('/validateToken')
-  async validate() {
-    return 'ok'
+  async validate(@CurrentUser() nutritionistPayload: TokenSchema) {
+    return nutritionistPayload
   }
 }
