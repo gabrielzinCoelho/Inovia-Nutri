@@ -16,7 +16,7 @@ export class Nutritionist {
   @Prop({ required: true, unique: true })
   email: string
 
-  @Factory(async (faker: Faker) => {
+  @Factory((faker: Faker) => {
     const password = faker.internet.password()
     return hashSync(password, 6)
   })

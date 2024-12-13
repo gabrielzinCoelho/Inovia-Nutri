@@ -12,14 +12,12 @@ export class NutritionistSeeder implements Seeder {
   ) {}
 
   async seed(): Promise<any> {
-    console.log('seed')
     const seededNutritionists =
       DataFactory.createForClass(Nutritionist).generate(2)
     return await this.nutritionistModel.insertMany(seededNutritionists)
   }
 
   async drop(): Promise<any> {
-    console.log('drop')
     return this.nutritionistModel.deleteMany({})
   }
 }
