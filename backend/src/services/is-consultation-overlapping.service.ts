@@ -21,12 +21,6 @@ export class IsConsultationOverlappingService {
     endTime: newConsultationEndTime,
     nutritionistId,
   }: IsConsultationOverlappingServiceParams): Promise<boolean> {
-    console.log(
-      newConsultationStartTime,
-      newConsultationEndTime,
-      nutritionistId,
-    )
-
     const overlappingConsultation = await this.consultationModel.findOne({
       nutritionist: nutritionistId,
       $nor: [
@@ -34,8 +28,6 @@ export class IsConsultationOverlappingService {
         { end_time: { $lte: newConsultationStartTime } }, // consulta existente termina antes da nova consulta
       ],
     })
-
-    console.log(overlappingConsultation)
 
     return !!overlappingConsultation
   }

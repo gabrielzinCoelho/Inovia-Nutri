@@ -9,6 +9,11 @@ import { IsConsultationOverlappingService } from 'src/services/is-consultation-o
 import { ClientModule } from './client.module'
 import { NutritionistModule } from './nutritionist.module'
 import { CreateConsultationController } from 'src/controllers/create-consultation.controller'
+import { ShowConsultationService } from 'src/services/show-consultation.service'
+import { ShowConsultationController } from 'src/controllers/show-consultation.controller'
+import { BiotypeModule } from './biotype.module'
+import { FetchConsultationsController } from 'src/controllers/fetch-consultations.controller'
+import { FetchConsultationService } from 'src/services/fetch-consultation.service'
 
 @Module({
   imports: [
@@ -17,9 +22,19 @@ import { CreateConsultationController } from 'src/controllers/create-consultatio
     ]),
     ClientModule,
     NutritionistModule,
+    BiotypeModule,
   ],
-  controllers: [CreateConsultationController],
-  providers: [CreateConsultationService, IsConsultationOverlappingService],
+  controllers: [
+    CreateConsultationController,
+    ShowConsultationController,
+    FetchConsultationsController,
+  ],
+  providers: [
+    CreateConsultationService,
+    IsConsultationOverlappingService,
+    ShowConsultationService,
+    FetchConsultationService,
+  ],
   exports: [MongooseModule],
 })
 export class ConsultationModule {}
