@@ -6,6 +6,7 @@ import { NutritionistModule } from './modules/nutritionist.module'
 import { AuthModule } from './modules/auth.module'
 import { validateOrReject } from 'class-validator'
 import { plainToInstance } from 'class-transformer'
+import { ConsultationModule } from './modules/consultation.module'
 
 @Module({
   imports: [
@@ -35,6 +36,7 @@ import { plainToInstance } from 'class-transformer'
     }),
     NutritionistModule,
     AuthModule,
+    ConsultationModule,
   ],
   controllers: [],
   providers: [],
