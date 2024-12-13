@@ -7,8 +7,8 @@ import { Consultation } from 'src/schemas/consultation.schema'
 import { Nutritionist } from 'src/schemas/nutritionist.schema'
 
 interface FetchConsultationServiceParams {
-  fetchStartTime?: Date
-  fetchEndTime?: Date
+  minStartTime?: Date
+  maxStartTime?: Date
 }
 
 @Injectable()
@@ -24,14 +24,14 @@ export class FetchConsultationService {
   ) {}
 
   async execute({
-    fetchStartTime,
-    fetchEndTime,
+    minStartTime,
+    maxStartTime,
   }: FetchConsultationServiceParams): Promise<Consultation[] | null> {
     const query: any = {}
 
-    if (fetchStartTime) query.start_time = { $gte: fetchStartTime }
+    if (minStartTime) query.start_time = { $gte: minStartTime }
 
-    if (fetchEndTime) query.end_time = { $lte: fetchEndTime }
+    if (maxStartTime) query.start_time = { $lte: maxStartTime }
 
     const consultations = await this.consultationModel.find(query)
 

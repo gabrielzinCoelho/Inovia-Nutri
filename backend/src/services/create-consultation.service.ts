@@ -10,6 +10,7 @@ import { Consultation } from 'src/schemas/consultation.schema'
 import { IsConsultationOverlappingService } from './is-consultation-overlapping.service'
 import { Nutritionist } from 'src/schemas/nutritionist.schema'
 import { Client } from 'src/schemas/client.schema'
+import { Biotype } from 'src/schemas/biotype.schema'
 
 interface CreateConsultationServiceParams {
   startTime: Date
@@ -31,6 +32,7 @@ export class CreateConsultationService {
     @InjectModel(Nutritionist.name)
     private nutritionistModel: Model<Nutritionist>,
     @InjectModel(Client.name) private clientModel: Model<Client>,
+    @InjectModel(Biotype.name) private biotypeModel: Model<Biotype>,
     private isConsultationOverlapService: IsConsultationOverlappingService,
   ) {}
 
@@ -50,7 +52,9 @@ export class CreateConsultationService {
       throw new BadRequestException('Nutritionist dont exists.')
 
     const client = isValidObjectId(clientId)
-      ? await this.clientModel.findById(new Types.ObjectId(clientId))
+      ? await this.clientModel
+          .findById(new Types.ObjectId(clientId))
+          .populate('biotype', '', this.biotypeModel)
       : false
 
     if (!client) throw new BadRequestException('Client dont exists.')

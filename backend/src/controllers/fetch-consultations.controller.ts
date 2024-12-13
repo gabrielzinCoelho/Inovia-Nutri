@@ -12,15 +12,16 @@ import { IsOptional } from 'class-validator'
 import * as dayjs from 'dayjs'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { FetchConsultationService } from 'src/services/fetch-consultation.service'
+import { FetchConsultationstApiResponse } from 'src/swagger/consultations/fetch-consultations-api'
 
 class FetchConsultationsDto {
-  @ApiProperty({ required: true, example: 'to do' })
+  @ApiProperty({ required: true, example: '2024-12-12T06:00:00.000Z' })
   @IsOptional()
-  fetchStartTime?: Date
+  minStartTime?: Date
 
-  @ApiProperty({ required: true, example: 'to do' })
+  @ApiProperty({ required: true, example: '2024-12-12T21:00:00.000Z' })
   @IsOptional()
-  fetchEndTime?: Date
+  maxStartTime?: Date
 }
 
 @ApiTags('Consultas')
@@ -31,22 +32,20 @@ export class FetchConsultationsController {
   @Get()
   @HttpCode(200)
   @UsePipes(new ValidationPipe({ transform: true, whitelist: true }))
-  @ApiResponse({})
+  @ApiResponse(FetchConsultationstApiResponse)
   @UseGuards(JwtAuthGuard)
-  async handle(
-    @Query() { fetchStartTime, fetchEndTime }: FetchConsultationsDto,
-  ) {
-    const fetchStartOfTheDay = !fetchStartTime
+  async handle(@Query() { minStartTime, maxStartTime }: FetchConsultationsDto) {
+    const fetchStartOfTheDay = !minStartTime
       ? undefined
-      : dayjs(fetchStartTime).startOf('day').toDate()
+      : dayjs(minStartTime).startOf('day').toDate()
 
-    const fetchEndOfTheDay = !fetchEndTime
+    const fetchEndOfTheDay = !maxStartTime
       ? undefined
-      : dayjs(fetchEndTime).endOf('day').toDate()
+      : dayjs(maxStartTime).endOf('day').toDate()
 
     const consultations = await this.fetchConsultationService.execute({
-      fetchStartTime: fetchStartOfTheDay,
-      fetchEndTime: fetchEndOfTheDay,
+      minStartTime: fetchStartOfTheDay,
+      maxStartTime: fetchEndOfTheDay,
     })
 
     return { consultations }
