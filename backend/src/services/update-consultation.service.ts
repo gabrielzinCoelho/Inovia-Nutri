@@ -49,7 +49,7 @@ export class UpdateConsultationService {
       : false
 
     if (!consultation)
-      throw new BadRequestException('Consultation dont exists.')
+      throw new BadRequestException('Consultation does not exist.')
 
     const nutritionist = isValidObjectId(nutritionistId)
       ? await this.nutritionistModel.findById(
@@ -58,7 +58,7 @@ export class UpdateConsultationService {
       : false
 
     if (!nutritionist)
-      throw new BadRequestException('Nutritionist dont exists.')
+      throw new BadRequestException('Nutritionist does not exist.')
 
     const client = isValidObjectId(clientId)
       ? await this.clientModel
@@ -66,7 +66,7 @@ export class UpdateConsultationService {
           .populate('biotype', '', this.biotypeModel)
       : false
 
-    if (!client) throw new BadRequestException('Client dont exists.')
+    if (!client) throw new BadRequestException('Client does not exist.')
 
     const endTime = dayjs(startTime).add(durationInMinutes, 'minutes').toDate()
 
@@ -91,15 +91,14 @@ export class UpdateConsultationService {
       },
       {
         new: true,
-        overwrite: true,
       },
     )
 
     if (!updatedConsultation)
-      throw new BadRequestException('Consultation updated failed.')
+      throw new BadRequestException('Failed to update consultation.')
 
     return {
-      ...updatedConsultation['_doc'],
+      ...updatedConsultation.toObject(),
       nutritionist,
       client,
     }

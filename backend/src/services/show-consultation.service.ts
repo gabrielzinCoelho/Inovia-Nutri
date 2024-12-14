@@ -35,7 +35,8 @@ export class ShowConsultationService {
         },
       })
 
-    if (!consultation) throw new BadRequestException('Consult dont exists.')
+    if (!consultation)
+      throw new BadRequestException('Consultation does not exist.')
 
     return consultation
   }

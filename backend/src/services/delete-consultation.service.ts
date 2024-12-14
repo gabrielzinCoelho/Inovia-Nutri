@@ -19,7 +19,8 @@ export class DeleteConsultationService {
   }: DeleteConsultationServiceParams): Promise<Consultation> {
     const consultation = await this.consultationModel.findByIdAndDelete(id)
 
-    if (!consultation) throw new BadRequestException('Consult dont exists.')
+    if (!consultation)
+      throw new BadRequestException('Consultation dont exists.')
 
     return consultation
   }

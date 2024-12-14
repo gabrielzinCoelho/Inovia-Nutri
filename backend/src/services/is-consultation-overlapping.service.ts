@@ -39,7 +39,6 @@ export class IsConsultationOverlappingService {
     )
       return false
 
-    console.log(overlappingConsultation)
     return true
   }
 }
