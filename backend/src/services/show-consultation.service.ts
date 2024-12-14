@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common'
+import { BadRequestException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { Biotype } from 'src/schemas/biotype.schema'
@@ -22,9 +22,7 @@ export class ShowConsultationService {
     private biotypeModel: Model<Biotype>,
   ) {}
 
-  async execute({
-    id,
-  }: ShowConsultationServiceParams): Promise<Consultation | null> {
+  async execute({ id }: ShowConsultationServiceParams): Promise<Consultation> {
     const consultation = await this.consultationModel
       .findById(id)
       .populate('nutritionist', '', this.nutritionistModel)
@@ -36,6 +34,8 @@ export class ShowConsultationService {
           model: this.biotypeModel,
         },
       })
+
+    if (!consultation) throw new BadRequestException('Consult dont exists.')
 
     return consultation
   }

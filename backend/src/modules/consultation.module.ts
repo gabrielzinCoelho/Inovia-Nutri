@@ -14,6 +14,10 @@ import { ShowConsultationController } from 'src/controllers/show-consultation.co
 import { BiotypeModule } from './biotype.module'
 import { FetchConsultationsController } from 'src/controllers/fetch-consultations.controller'
 import { FetchConsultationService } from 'src/services/fetch-consultation.service'
+import { DeleteConsultationService } from 'src/services/delete-consultation.service'
+import { DeleteConsultationController } from 'src/controllers/delete-consultation.controller'
+import { UpdateConsultationService } from 'src/services/update-consultation.service'
+import { UpdateConsultationController } from 'src/controllers/update-consultation.controller'
 
 @Module({
   imports: [
@@ -28,12 +32,16 @@ import { FetchConsultationService } from 'src/services/fetch-consultation.servic
     CreateConsultationController,
     ShowConsultationController,
     FetchConsultationsController,
+    DeleteConsultationController,
+    UpdateConsultationController,
   ],
   providers: [
     CreateConsultationService,
     IsConsultationOverlappingService,
     ShowConsultationService,
     FetchConsultationService,
+    DeleteConsultationService,
+    UpdateConsultationService,
   ],
   exports: [MongooseModule],
 })

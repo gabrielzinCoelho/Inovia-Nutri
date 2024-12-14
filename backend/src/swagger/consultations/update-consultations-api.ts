@@ -1,12 +1,12 @@
-export const ShowConsultationApiResponse = {
+export const UpdateConsultationApiResponse = {
   status: 200,
-  description: 'Consulta buscada com sucesso.',
+  description: 'Consulta atualizada com sucesso.',
   schema: {
     example: {
       consultation: {
-        _id: '675cc10ac5464c094652f75f',
-        start_time: '2024-12-13T20:30:00.000Z',
-        end_time: '2024-12-13T21:00:00.000Z',
+        _id: '675cc181c5464c094652f77b',
+        start_time: '2024-12-13T22:12:00.000Z',
+        end_time: '2024-12-13T22:22:00.000Z',
         nutritionist: {
           _id: '675cbf74c5464c094652f758',
           name: 'John Doe',
@@ -16,12 +16,12 @@ export const ShowConsultationApiResponse = {
           __v: 0,
         },
         client: {
-          _id: '675cbf1b6b8f36c655c2dc56',
-          name: 'Victor Abshire',
-          cpf: '925.318.768-84',
-          email: 'Desiree_Batz24@gmail.com',
-          phone: '(15) 98210-9937',
-          date_of_birth: '1985-02-19T12:39:05.226Z',
+          _id: '675cbf1b6b8f36c655c2dc57',
+          name: 'Bertha Orn',
+          cpf: '567.292.299-75',
+          email: 'Orin27@hotmail.com',
+          phone: '(96) 94591-2356',
+          date_of_birth: '2000-11-05T15:35:07.396Z',
           biotype: {
             _id: '675cbf1b6b8f36c655c2dc51',
             description: 'Ectomorfo',

@@ -4,6 +4,7 @@ import { Model } from 'mongoose'
 import { Consultation } from 'src/schemas/consultation.schema'
 
 interface IsConsultationOverlappingServiceParams {
+  consultationIdToIgnore?: string
   startTime: Date
   endTime: Date
   nutritionistId: string
@@ -17,11 +18,12 @@ export class IsConsultationOverlappingService {
   ) {}
 
   async execute({
+    consultationIdToIgnore,
     startTime: newConsultationStartTime,
     endTime: newConsultationEndTime,
     nutritionistId,
   }: IsConsultationOverlappingServiceParams): Promise<boolean> {
-    const overlappingConsultation = await this.consultationModel.findOne({
+    const overlappingConsultation = await this.consultationModel.find({
       nutritionist: nutritionistId,
       $nor: [
         { start_time: { $gte: newConsultationEndTime } }, // consulta existente começa depois da nova consulta
@@ -29,6 +31,15 @@ export class IsConsultationOverlappingService {
       ],
     })
 
-    return !!overlappingConsultation
+    if (overlappingConsultation.length === 0) return false
+
+    if (
+      overlappingConsultation.length === 1 &&
+      overlappingConsultation[0].id.toString() === consultationIdToIgnore
+    )
+      return false
+
+    console.log(overlappingConsultation)
+    return true
   }
 }
