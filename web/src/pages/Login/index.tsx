@@ -6,8 +6,15 @@ import { api } from "../../lib/axios";
 import { VisibilityOff, Visibility, Email } from '@mui/icons-material';
 import { Portal } from '@mui/base/Portal';
 import { NotifyAlert } from "../../components/notify-alert";
+import { useNavigate } from "react-router-dom";
 
 export function Login() {
+
+  function setTokenInLocalStorage(token : string){
+    localStorage.setItem('@inovia-nutri:token-1.0.0', token)
+  }
+
+  const navigate = useNavigate();
 
   const [userEmail, setUserEmail] = useState('')
 
@@ -29,6 +36,9 @@ export function Login() {
       
       if(authResponse.status !== 200)
         throw new Error('Unauthorized access.')
+
+      setTokenInLocalStorage(authResponse.data.token)
+      navigate('/')
 
     }catch(err){
 
