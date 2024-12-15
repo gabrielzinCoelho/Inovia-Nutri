@@ -1,7 +1,18 @@
+import { Global } from "@emotion/react";
+import {useTheme} from '@mui/material/styles'
+import { createGlobalStyles } from "./styles/global";
+import { Login } from "./pages/Login";
+
 export function App() {
   
+  const theme = useTheme()
+  const globalStyles = createGlobalStyles(theme)
+
   return (
-    <h1>Inovia Nutri</h1>
+      <>
+        <Global styles={globalStyles} />
+        <Login /> 
+      </>
   )
 }
 

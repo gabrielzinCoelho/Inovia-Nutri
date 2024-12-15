@@ -6,7 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger'
 import { swaggerDocumentOptions } from './swagger/swagger-document-options'
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, { cors: true })
 
   const configService: ConfigService<EnvSchema, true> = app.get(ConfigService)
   const port = configService.get('PORT', { infer: true })
