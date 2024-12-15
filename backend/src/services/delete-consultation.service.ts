@@ -20,7 +20,7 @@ export class DeleteConsultationService {
     const consultation = await this.consultationModel.findByIdAndDelete(id)
 
     if (!consultation)
-      throw new BadRequestException('Consultation does not exist.')
+      throw new BadRequestException('Consultation dont exists.')
 
     return consultation
   }
