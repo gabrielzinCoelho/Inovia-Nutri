@@ -1,16 +1,22 @@
 import {
   Body,
   Controller,
+  Get,
   HttpCode,
   Post,
+  UseGuards,
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { IsEmail, MinLength } from 'class-validator'
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { AuthenticateNutritionistService } from 'src/services/authenticate-nutritionist.service'
-import { authenticateNutritionistApiResponse } from 'src/swagger/nutritionist/authenticate-nutritionist-api'
+import {
+  authenticateNutritionistApiResponse,
+  validateNutritionistTokenApiResponse,
+} from 'src/swagger/nutritionist/authenticate-nutritionist-api'
 
 class AuthenticateNutritionistDto {
   @ApiProperty({ required: true, example: 'johndoe@example.com' })
@@ -48,9 +54,13 @@ export class AuthenticateNutritionistController {
     return { token }
   }
 
-  // @UseGuards(JwtAuthGuard)
-  // @Post('/validateToken')
-  // async validate(@CurrentUser() nutritionistPayload: TokenPayloadDto) {
-  //   return nutritionistPayload
-  // }
+  @UseGuards(JwtAuthGuard)
+  @Get('/validate-token')
+  @HttpCode(200)
+  @ApiResponse(validateNutritionistTokenApiResponse)
+  async validate() {
+    return {
+      statusToken: 'valid',
+    }
+  }
 }

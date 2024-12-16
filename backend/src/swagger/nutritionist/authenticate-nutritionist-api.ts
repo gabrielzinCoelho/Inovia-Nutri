@@ -8,3 +8,13 @@ export const authenticateNutritionistApiResponse = {
     },
   },
 }
+
+export const validateNutritionistTokenApiResponse = {
+  status: 200,
+  description: 'O token informado é válido.',
+  schema: {
+    example: {
+      statusToken: 'valid',
+    },
+  },
+}

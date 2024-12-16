@@ -6,15 +6,12 @@ import { api } from "../../lib/axios";
 import { VisibilityOff, Visibility, Email } from '@mui/icons-material';
 import { Portal } from '@mui/base/Portal';
 import { NotifyAlert } from "../../components/notify-alert";
-import { useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { login } from "../../store/auth-slice";
 
 export function Login() {
 
-  function setTokenInLocalStorage(token : string){
-    localStorage.setItem('@inovia-nutri:token-1.0.0', token)
-  }
-
-  const navigate = useNavigate();
+  const dispatch = useDispatch()
 
   const [userEmail, setUserEmail] = useState('')
 
@@ -37,9 +34,11 @@ export function Login() {
       if(authResponse.status !== 200)
         throw new Error('Unauthorized access.')
 
-      setTokenInLocalStorage(authResponse.data.token)
-      navigate('/')
-
+      dispatch(login({
+        token: authResponse.data.token
+      }))
+    
+    // eslint-disable-next-line
     }catch(err){
 
         setUserPassword('')

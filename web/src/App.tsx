@@ -3,6 +3,8 @@ import {useTheme} from '@mui/material/styles'
 import { createGlobalStyles } from "./styles/global";
 import { Router } from "./components/Router";
 import { BrowserRouter } from "react-router-dom";
+import {Provider as ReduxProvider} from 'react-redux'
+import { store } from "./store";
 
 export function App() {
   
@@ -13,7 +15,9 @@ export function App() {
       <>
         <Global styles={globalStyles} />
         <BrowserRouter>
-          <Router />
+          <ReduxProvider store={store}>
+            <Router />
+          </ReduxProvider>
         </BrowserRouter>
       </>
   )

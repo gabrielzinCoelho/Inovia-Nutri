@@ -2,6 +2,8 @@ import { ListItemIcon, Menu, MenuItem } from "@mui/material";
 import { MyAccountCircle, UserSettingsMenuContainer } from "./styles";
 import { Logout } from "@mui/icons-material";
 import React from "react";
+import { useDispatch } from "react-redux";
+import { logout } from "../../../../store/auth-slice";
 
 export function UserSettingsMenu(){
 
@@ -14,10 +16,11 @@ export function UserSettingsMenu(){
     setAnchorEl(null);
   };
 
+  const dispatch = useDispatch()
+
   function handleClickLogout(){
 
-    window.alert('logout')
-
+    dispatch(logout())
   }
 
   return (
