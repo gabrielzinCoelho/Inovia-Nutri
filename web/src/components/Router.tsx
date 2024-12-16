@@ -1,12 +1,12 @@
 import { Routes, Route } from "react-router-dom";
 import { Login } from "../pages/Login";
-import { Calendar } from "../pages/Calendar";
+import { Home } from "../pages/Home";
 
 export function Router(){
 
   return (
     <Routes>
-      <Route  path="/" element={<Calendar />} />
+      <Route  path="/" element={<Home />} />
       <Route path="/login" element={<Login />} />
     </Routes>
   )

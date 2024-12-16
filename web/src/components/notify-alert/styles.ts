@@ -11,7 +11,4 @@ export const AlertContainer = styled("div")(() => ({
 }));
 
 export const MyAlert = styled(Alert)(() => ({
-
-  
-
 }))
