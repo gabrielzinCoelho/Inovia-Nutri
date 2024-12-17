@@ -26,6 +26,10 @@ export const createGlobalStyles = (theme : Theme) => {
     font: 400 1rem Roboto, sans-serif;
   }
 
+  html, body, #root {
+    height: 100%;
+  }
+
 `
 
 }

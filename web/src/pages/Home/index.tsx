@@ -1,12 +1,15 @@
+import {Calendar} from "./components/calendar";
 import { Header } from "./components/header";
-import { CalendarContainer, HomeContainer } from "./styles";
+import { ContentContainer, HomeContainer } from "./styles";
 
 export function Home(){
 
   return (
     <HomeContainer>
       <Header />
-      <CalendarContainer />
+      <ContentContainer>
+        <Calendar />
+      </ContentContainer>
     </HomeContainer>
   )
 }

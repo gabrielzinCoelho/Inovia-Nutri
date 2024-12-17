@@ -11,6 +11,21 @@ interface FetchConsultationServiceParams {
   maxStartTime?: Date
 }
 
+type Modify<T, R> = Pick<T, Exclude<keyof T, keyof R>> & R
+export type FetchConsultationServiceResponse = Modify<
+  Consultation,
+  {
+    nutritionist: {
+      _id: string
+      name: string
+    }
+    client: {
+      _id: string
+      name: string
+    }
+  }
+>
+
 @Injectable()
 export class FetchConsultationService {
   constructor(
@@ -26,14 +41,25 @@ export class FetchConsultationService {
   async execute({
     minStartTime,
     maxStartTime,
-  }: FetchConsultationServiceParams): Promise<Consultation[] | null> {
+  }: FetchConsultationServiceParams): Promise<
+    FetchConsultationServiceResponse[] | null
+  > {
     const query: any = {}
 
     if (minStartTime) query.start_time = { $gte: minStartTime }
 
     if (maxStartTime) query.start_time = { $lte: maxStartTime }
 
-    const consultations = await this.consultationModel.find(query)
+    const consultations = await this.consultationModel
+      .find(query)
+      .populate<{
+        nutritionist: { _id: string; name: string }
+      }>('nutritionist', 'id, name', this.nutritionistModel)
+      .populate<{ client: { _id: string; name: string } }>(
+        'client',
+        'id, name',
+        this.clientModel,
+      )
 
     return consultations
   }
