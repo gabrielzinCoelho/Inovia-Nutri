@@ -1,5 +1,5 @@
 import dayGridPlugin from '@fullcalendar/daygrid'
-import { DatesSetArg, EventClickArg } from '@fullcalendar/core/index.js'
+import { DatesSetArg, EventClickArg, EventContentArg } from '@fullcalendar/core/index.js'
 import { CalendarContainer } from './styles'
 import FullCalendar from '@fullcalendar/react'
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
@@ -28,6 +28,19 @@ interface FetchConsultationsApiResponse {
     name: string
   }
 
+}
+
+interface EventDataPayload {
+  consultationId: string,
+  nutritionistId: string,
+  nutritionistName: string,
+  clientName: string
+}
+
+export type RenderEventData = EventContentArg & { 
+  event: { 
+    extendedProps: EventDataPayload
+  } 
 }
 
 function isIntervalContained(startDateA: Date, endDateA: Date, startDateB: Date, endDateB: Date) {
@@ -65,6 +78,7 @@ export function Calendar() {
   const { token: userToken } = useAppSelector(store => store.auth)
 
   const [showConsultationModalOpen, setShowConsultationModalOpen] = useState(false)
+  const [selectedConsultation, setSetelectedConsultation] = useState<string | null>(null)
 
   const [calendarViewState, dispatch] = useReducer(
     CalendarViewReducer,
@@ -105,8 +119,8 @@ export function Calendar() {
   }
 
   function handleEventClick(arg: EventClickArg) {
-    // console.log(arg.event)
     setShowConsultationModalOpen(true)
+    setSetelectedConsultation(arg.event.extendedProps.consultationId)
   }
 
   function handleAddEvent() {
@@ -134,9 +148,10 @@ export function Calendar() {
             calendarViewState.consultationsEvents.map((consultation: ConsultationEvent) => ({
               start: consultation.startTime,
               end: consultation.endTime,
-              ...consultation,
-              startTime: undefined,
-              endTime: undefined
+              consultationId: consultation.id,
+              nutritionistId: consultation.nutritionist.id,
+              nutritionistName: consultation.nutritionist.name,
+              clientName: consultation.client
             }))
           }
           customButtons={{
@@ -148,9 +163,16 @@ export function Calendar() {
           eventClick={handleEventClick}
         />
       </CalendarContainer>
-      <Dialog.Root open={showConsultationModalOpen} onOpenChange={setShowConsultationModalOpen}>
-        <ShowConsultationModal />
-      </Dialog.Root>
+      {
+        showConsultationModalOpen 
+          &&
+        <Dialog.Root open={showConsultationModalOpen} onOpenChange={setShowConsultationModalOpen}>
+          <ShowConsultationModal
+            consultationId={selectedConsultation!}
+            closeModal={() => (setShowConsultationModalOpen(false))}
+          />
+        </Dialog.Root>
+      }
     </>
   )
 }
