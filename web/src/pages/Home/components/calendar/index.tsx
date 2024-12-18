@@ -5,12 +5,14 @@ import FullCalendar from '@fullcalendar/react'
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 import { CalendarEvent } from '../calendar-event';
 import listPlugin from '@fullcalendar/list';
-import { useReducer } from 'react';
+import { useReducer, useState } from 'react';
 import { api } from '../../../../lib/axios';
 import dayjs from 'dayjs'
 import { useAppSelector } from '../../../../store';
 import { CalendarViewReducer, ConsultationEvent, DateRange } from './calendar-view-reducer/reducer';
 import { newCalendarViewAction } from './calendar-view-reducer/actions';
+import * as Dialog from "@radix-ui/react-dialog";
+import { ShowConsultationModal } from '../show-consultation-modal';
 
 interface FetchConsultationsApiResponse {
 
@@ -33,7 +35,7 @@ function isIntervalContained(startDateA: Date, endDateA: Date, startDateB: Date,
     (dayjs(endDateA).isAfter(endDateB) || dayjs(endDateA).isSame(endDateB))
 }
 
-async function fetchConsultationsEvents (dateRange : DateRange, userToken : string) : Promise<ConsultationEvent[]> {
+async function fetchConsultationsEvents(dateRange: DateRange, userToken: string): Promise<ConsultationEvent[]> {
 
   const response = await api.get('/consultations', {
     headers: { "Authorization": `Bearer ${userToken}` },
@@ -42,10 +44,10 @@ async function fetchConsultationsEvents (dateRange : DateRange, userToken : stri
       maxStartTime: dateRange.endDate
     }
   });
-  
+
   const data = response.data.consultations
 
-  return data.map((consultationData : FetchConsultationsApiResponse) => ({
+  return data.map((consultationData: FetchConsultationsApiResponse) => ({
 
     id: consultationData['_id'],
     startTime: consultationData.start_time,
@@ -53,14 +55,16 @@ async function fetchConsultationsEvents (dateRange : DateRange, userToken : stri
     nutritionist: {
       id: consultationData.nutritionist._id,
       name: consultationData.nutritionist.name
-    }, 
+    },
     client: consultationData.client.name
-  })); 
+  }));
 }
 
 export function Calendar() {
 
-  const {token: userToken} = useAppSelector(store => store.auth)
+  const { token: userToken } = useAppSelector(store => store.auth)
+
+  const [showConsultationModalOpen, setShowConsultationModalOpen] = useState(false)
 
   const [calendarViewState, dispatch] = useReducer(
     CalendarViewReducer,
@@ -78,14 +82,14 @@ export function Calendar() {
     if (
       !calendarViewState.dateRange ||
       !isIntervalContained(calendarViewState.dateRange.startDate, calendarViewState.dateRange.endDate, calendarShowingStartDate, calendarShowingEndDate)
-    ){
+    ) {
 
       const newConsultationsData = await fetchConsultationsEvents({
         startDate: calendarShowingStartDate,
         endDate: calendarShowingEndDate
       },
-      userToken!
-    )  
+        userToken!
+      )
 
       dispatch(
         newCalendarViewAction(
@@ -93,7 +97,7 @@ export function Calendar() {
           {
             startDate: calendarShowingStartDate,
             endDate: calendarShowingEndDate
-          } 
+          }
         )
       )
 
@@ -101,7 +105,8 @@ export function Calendar() {
   }
 
   function handleEventClick(arg: EventClickArg) {
-    console.log(arg.event)
+    // console.log(arg.event)
+    setShowConsultationModalOpen(true)
   }
 
   function handleAddEvent() {
@@ -109,38 +114,43 @@ export function Calendar() {
   }
 
   return (
-    <CalendarContainer>
-      <FullCalendar
-        locale={ptBrLocale}
-        fixedWeekCount={false}
-        height={'100%'}
-        plugins={[dayGridPlugin, listPlugin]}
-        initialView={'dayGridMonth'}
-        dayMaxEvents={true}
-        headerToolbar={{
-          left: 'prev,next,today',
-          center: 'title',
-          right: 'dayGridMonth,dayGridWeek,dayGridDay,list addEvent'
-        }}
-        datesSet={handleDatesSet}
-        eventContent={CalendarEvent}
-        events={
-          calendarViewState.consultationsEvents.map((consultation : ConsultationEvent) => ({
-            start: consultation.startTime, 
-            end: consultation.endTime,
-            ...consultation,
-            startTime: undefined,
-            endTime: undefined
-          }))
-        }
-        customButtons={{
-          addEvent: {
-            text: 'Agendar consulta',
-            click: handleAddEvent,
+    <>
+      <CalendarContainer>
+        <FullCalendar
+          locale={ptBrLocale}
+          fixedWeekCount={false}
+          height={'100%'}
+          plugins={[dayGridPlugin, listPlugin]}
+          initialView={'dayGridMonth'}
+          dayMaxEvents={true}
+          headerToolbar={{
+            left: 'prev,next,today',
+            center: 'title',
+            right: 'dayGridMonth,dayGridWeek,dayGridDay,list addEvent'
+          }}
+          datesSet={handleDatesSet}
+          eventContent={CalendarEvent}
+          events={
+            calendarViewState.consultationsEvents.map((consultation: ConsultationEvent) => ({
+              start: consultation.startTime,
+              end: consultation.endTime,
+              ...consultation,
+              startTime: undefined,
+              endTime: undefined
+            }))
           }
-        }}
-        eventClick={handleEventClick}
-      />
-    </CalendarContainer>
+          customButtons={{
+            addEvent: {
+              text: 'Agendar consulta',
+              click: handleAddEvent,
+            }
+          }}
+          eventClick={handleEventClick}
+        />
+      </CalendarContainer>
+      <Dialog.Root open={showConsultationModalOpen} onOpenChange={setShowConsultationModalOpen}>
+        <ShowConsultationModal />
+      </Dialog.Root>
+    </>
   )
 }
