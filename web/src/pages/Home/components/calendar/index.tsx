@@ -10,9 +10,11 @@ import { api } from '../../../../lib/axios';
 import dayjs from 'dayjs'
 import { useAppSelector } from '../../../../store';
 import { CalendarViewReducer, ConsultationEvent, DateRange } from './calendar-view-reducer/reducer';
-import { newCalendarViewAction } from './calendar-view-reducer/actions';
+import { newCalendarViewAction, removeConsultationEventAction } from './calendar-view-reducer/actions';
 import * as Dialog from "@radix-ui/react-dialog";
 import { ShowConsultationModal } from '../show-consultation-modal';
+import { AlertProps } from '@mui/material';
+import { NotifyAlert } from '../../../../components/notify-alert';
 
 interface FetchConsultationsApiResponse {
 
@@ -41,6 +43,14 @@ export type RenderEventData = EventContentArg & {
   event: { 
     extendedProps: EventDataPayload
   } 
+}
+
+interface NotifyAlertState {
+  isOpen: boolean,
+  title?: string, 
+  message?: string, 
+  variant?: AlertProps['variant']
+  severity?: AlertProps['severity']
 }
 
 function isIntervalContained(startDateA: Date, endDateA: Date, startDateB: Date, endDateB: Date) {
@@ -77,6 +87,9 @@ export function Calendar() {
 
   const { token: userToken } = useAppSelector(store => store.auth)
 
+  const [notifyAlert, setNotifyAlert] = useState<NotifyAlertState>({
+    isOpen: false
+  })
   const [showConsultationModalOpen, setShowConsultationModalOpen] = useState(false)
   const [selectedConsultation, setSetelectedConsultation] = useState<string | null>(null)
 
@@ -116,6 +129,21 @@ export function Calendar() {
       )
 
     }
+  }
+
+  function removeConsultationEventCallback(consultationId : string){
+
+    dispatch(
+      removeConsultationEventAction(consultationId)
+    )
+    setShowConsultationModalOpen(false)
+    setNotifyAlert({
+      isOpen: true,
+      title: 'Sucesso', 
+      message: 'Consulta removida com sucesso.', 
+      variant: 'standard',
+      severity: 'success'
+    })
   }
 
   function handleEventClick(arg: EventClickArg) {
@@ -169,9 +197,21 @@ export function Calendar() {
         <Dialog.Root open={showConsultationModalOpen} onOpenChange={setShowConsultationModalOpen}>
           <ShowConsultationModal
             consultationId={selectedConsultation!}
-            closeModal={() => (setShowConsultationModalOpen(false))}
+            removeEventCallback={removeConsultationEventCallback}
           />
         </Dialog.Root>
+      }
+      {
+        notifyAlert.isOpen 
+          &&
+        <NotifyAlert
+          isShowing={true}
+          title={notifyAlert.title!}
+          message={notifyAlert.message!}
+          severity={notifyAlert.severity!}
+          variant={notifyAlert.variant!}
+          closeModal={()=>(setNotifyAlert({isOpen: false}))}
+        />
       }
     </>
   )

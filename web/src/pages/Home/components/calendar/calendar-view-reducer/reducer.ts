@@ -1,3 +1,5 @@
+import { ActionTypes } from "./actions"
+
 export interface DateRange {
   startDate: Date,
   endDate: Date
@@ -22,17 +24,32 @@ export interface CalendarViewState {
 //eslint-disable-next-line
 export function CalendarViewReducer(state : CalendarViewState, action : any){
 
-  if(action.type === 'NEW_CALENDAR_VIEW'){
+  switch(action.type){
 
-    const {consultationsEvents, dateRange} = action.payload
+    case ActionTypes.NEW_CALENDAR_VIEW: {
+      const {consultationsEvents, dateRange} = action.payload
 
-    return {
-      consultationsEvents,
-      dateRange
+      return {
+        consultationsEvents,
+        dateRange
+      }
     }
 
-  }
+    case ActionTypes.REMOVE_CONSULTATION_EVENT: {
 
-  return state
+      const consultationId = action.payload.consultationId
+      const consultationsEventsWithoutRemoved = state.consultationsEvents.filter(consultation => consultation.id !== consultationId)
+
+      return {
+        consultationsEvents: consultationsEventsWithoutRemoved,
+        dateRange: state.dateRange
+      }
+
+    }
+
+    default:
+      return state
+
+  }
 
 }

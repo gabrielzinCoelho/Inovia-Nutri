@@ -11,7 +11,7 @@ import dayjs from "dayjs";
 
 interface ShowConsultationModalProps {
   consultationId: string,
-  closeModal: () => void
+  removeEventCallback: (consultationId : string) => void
 }
 
 interface ConsultatioData {
@@ -34,48 +34,50 @@ interface ConsultatioData {
 
 }
 
-export function ShowConsultationModal({consultationId, closeModal} : ShowConsultationModalProps) {
+export function ShowConsultationModal({consultationId, removeEventCallback} : ShowConsultationModalProps) {
 
   const { token: userToken } = useAppSelector(store => store.auth)
   
   const [consultationData, setConsultationData] = useState<ConsultatioData | null>(null)
 
+  async function handleDeleteConsultation(){
+
+    const response = await api.delete(`consultations/${consultationId}`, {
+      headers: { "Authorization": `Bearer ${userToken}` },
+    })
+
+    if(response.status === 200)
+      removeEventCallback(consultationId)
+
+  }
+
   useEffect(() => {
 
-    try{
-
-      api.get(`consultations/${consultationId}`, {
-        headers: { "Authorization": `Bearer ${userToken}` },
-      }).then(response => {
-        
-        const consultationResponse = response.data.consultation
-        setConsultationData({
-          id: consultationResponse._id,
-          startTime: consultationResponse.start_time,
-          duration: dayjs(consultationResponse.end_time).diff(dayjs(consultationResponse.start_time), 'minutes'),
-          nutritionist: {
-            name: consultationResponse.nutritionist.name,
-            email: consultationResponse.nutritionist.email,
-          },
-          client: {
-            name: consultationResponse.client.name,
-            cpf: consultationResponse.client.cpf,
-            email: consultationResponse.client.email,
-            phone: consultationResponse.client.phone,
-            dateOfBirth: consultationResponse.client.date_of_birth,
-            biotype:  consultationResponse.client.biotype.description,
-          }
-        })
+    api.get(`consultations/${consultationId}`, {
+      headers: { "Authorization": `Bearer ${userToken}` },
+    }).then(response => {
+      
+      const consultationResponse = response.data.consultation
+      setConsultationData({
+        id: consultationResponse._id,
+        startTime: consultationResponse.start_time,
+        duration: dayjs(consultationResponse.end_time).diff(dayjs(consultationResponse.start_time), 'minutes'),
+        nutritionist: {
+          name: consultationResponse.nutritionist.name,
+          email: consultationResponse.nutritionist.email,
+        },
+        client: {
+          name: consultationResponse.client.name,
+          cpf: consultationResponse.client.cpf,
+          email: consultationResponse.client.email,
+          phone: consultationResponse.client.phone,
+          dateOfBirth: consultationResponse.client.date_of_birth,
+          biotype:  consultationResponse.client.biotype.description,
+        }
       })
-    }//eslint-disable-next-line
-    catch(err){
-      window.alert('erro')
-      closeModal()
-    }
-
-  }, [consultationId, closeModal, userToken])
-  
-  console.log(consultationId, consultationData)
+    })
+   
+  }, [consultationId, userToken])
 
   return (
     <Dialog.Portal>
@@ -177,8 +179,9 @@ export function ShowConsultationModal({consultationId, closeModal} : ShowConsult
               <TextField
                 label="Data de Nascimento"
                 variant="filled" 
-                disabled 
-                value={consultationData?.client.dateOfBirth}
+                disabled
+                type='datetime-local' 
+                value={consultationData ? dayjs(consultationData.client.dateOfBirth).format("YYYY-MM-DDTHH:mm") : ''}
                 slotProps={{ inputLabel: { shrink: true } }}
                 />
               <TextField
@@ -201,7 +204,13 @@ export function ShowConsultationModal({consultationId, closeModal} : ShowConsult
             <Button size={"large"} color={'success'} variant="contained" startIcon={<Edit />}>
               Editar
             </Button>
-            <Button size={"large"} color={'error'} variant="contained" startIcon={<DeleteIcon />}>
+            <Button 
+              size={"large"} 
+              color={'error'} 
+              variant="contained" 
+              startIcon={<DeleteIcon />}
+              onClick={handleDeleteConsultation}
+            >
               Deletar
             </Button>
           </ButtonsContainer>
