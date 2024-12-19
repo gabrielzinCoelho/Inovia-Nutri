@@ -5,16 +5,16 @@ import FullCalendar from '@fullcalendar/react'
 import ptBrLocale from '@fullcalendar/core/locales/pt-br';
 import { CalendarEvent } from '../calendar-event';
 import listPlugin from '@fullcalendar/list';
-import { useReducer, useState } from 'react';
+import { useContext, useState } from 'react';
 import { api } from '../../../../lib/axios';
 import dayjs from 'dayjs'
 import { useAppSelector } from '../../../../store';
-import { CalendarViewReducer, ConsultationEvent, DateRange } from './calendar-view-reducer/reducer';
-import { newCalendarViewAction, removeConsultationEventAction } from './calendar-view-reducer/actions';
-import * as Dialog from "@radix-ui/react-dialog";
-import { ShowConsultationModal } from '../show-consultation-modal';
+import { ConsultationEvent, DateRange } from '../../reducers/calendar-view-reducer/reducer';
 import { AlertProps } from '@mui/material';
 import { NotifyAlert } from '../../../../components/notify-alert';
+import { ConsultationModalContext } from '../../contexts/consultation-modal-context';
+import { SwitchConsultationModal } from '../switch-consultation-modal';
+import { CalendarEventsContext } from '../../contexts/calendar-events-context';
 
 interface FetchConsultationsApiResponse {
 
@@ -82,24 +82,15 @@ async function fetchConsultationsEvents(dateRange: DateRange, userToken: string)
     client: consultationData.client.name
   }));
 }
-
 export function Calendar() {
 
   const { token: userToken } = useAppSelector(store => store.auth)
+  const { selectViewModal, selectCreateModal } = useContext(ConsultationModalContext)
+  const { calendarViewState, refreshCalendarEvents } = useContext(CalendarEventsContext)
 
   const [notifyAlert, setNotifyAlert] = useState<NotifyAlertState>({
     isOpen: false
   })
-  const [showConsultationModalOpen, setShowConsultationModalOpen] = useState(false)
-  const [selectedConsultation, setSetelectedConsultation] = useState<string | null>(null)
-
-  const [calendarViewState, dispatch] = useReducer(
-    CalendarViewReducer,
-    {
-      consultationsEvents: [],
-      dateRange: null
-    }
-  )
 
   async function handleDatesSet({ end, start }: DatesSetArg) {
 
@@ -118,41 +109,31 @@ export function Calendar() {
         userToken!
       )
 
-      dispatch(
-        newCalendarViewAction(
-          newConsultationsData,
-          {
-            startDate: calendarShowingStartDate,
-            endDate: calendarShowingEndDate
-          }
-        )
-      )
+      refreshCalendarEvents(newConsultationsData, calendarShowingStartDate, calendarShowingEndDate)
 
     }
   }
 
-  function removeConsultationEventCallback(consultationId : string){
+  // function removeConsultationEventCallback(consultationId : string){
 
-    dispatch(
-      removeConsultationEventAction(consultationId)
-    )
-    setShowConsultationModalOpen(false)
-    setNotifyAlert({
-      isOpen: true,
-      title: 'Sucesso', 
-      message: 'Consulta removida com sucesso.', 
-      variant: 'standard',
-      severity: 'success'
-    })
-  }
+  //   dispatch(
+  //     removeConsultationEventAction(consultationId)
+  //   )
+  //   setNotifyAlert({
+  //     isOpen: true,
+  //     title: 'Sucesso', 
+  //     message: 'Consulta removida com sucesso.', 
+  //     variant: 'standard',
+  //     severity: 'success'
+  //   })
+  // }
 
   function handleEventClick(arg: EventClickArg) {
-    setShowConsultationModalOpen(true)
-    setSetelectedConsultation(arg.event.extendedProps.consultationId)
+    selectViewModal(arg.event.extendedProps.consultationId)
   }
 
   function handleAddEvent() {
-
+    selectCreateModal()
   }
 
   return (
@@ -191,16 +172,7 @@ export function Calendar() {
           eventClick={handleEventClick}
         />
       </CalendarContainer>
-      {
-        showConsultationModalOpen 
-          &&
-        <Dialog.Root open={showConsultationModalOpen} onOpenChange={setShowConsultationModalOpen}>
-          <ShowConsultationModal
-            consultationId={selectedConsultation!}
-            removeEventCallback={removeConsultationEventCallback}
-          />
-        </Dialog.Root>
-      }
+      <SwitchConsultationModal />
       {
         notifyAlert.isOpen 
           &&
