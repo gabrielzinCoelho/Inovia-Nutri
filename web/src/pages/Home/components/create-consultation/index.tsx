@@ -1,15 +1,18 @@
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useAppSelector } from "../../../../store";
 import { api } from "../../../../lib/axios";
 import { ConsultationModal } from "../consultation-modal";
 import { Button } from "@mui/material";
 import { Add } from "@mui/icons-material";
+import { AlertContext } from "../../contexts/alerts-context";
+import { CalendarEventsContext } from "../../contexts/calendar-events-context";
+import { ConsultationModalContext } from "../../contexts/consultation-modal-context";
 
 interface ConsultationData {
-  startTime?: Date,
-  duration?: number,
-  nutritionistId?: string,
-  clientId?: string
+  startTime: Date | null,
+  duration: number | null,
+  nutritionistId: string | null,
+  clientId: string | null
 }
 
 interface NutritionistData {
@@ -29,30 +32,87 @@ interface ClientData {
   biotype: string,
 }
 
+const DEFAULT_SELECT_VALUE = 'DEFAULT_SELECT_VALUE'
 
 export function CreateConsultation() {
 
   const { token: userToken } = useAppSelector(store => store.auth)
+  const { showAlert } = useContext(AlertContext)
+  const { closeModal } = useContext(ConsultationModalContext)
+  const { addCalendarEvent } = useContext(CalendarEventsContext)
 
-  // const [consultationData, setConsultationData] = useState<ConsultationData | null>(null)
   const [nutritionistsData, setNutritionistsData] = useState<Map<string, NutritionistData>>(new Map())
   const [clientsData, setClientsData] = useState<Map<string, ClientData>>(new Map())
 
-  const [consultationData, setConsultationData] = useState<ConsultationData>({})
+  const [consultationData, setConsultationData] = useState<ConsultationData>({
+    startTime: null,
+    duration: null,
+    nutritionistId: null,
+    clientId: null
+  })
 
-  // async function handleCreateConsultation() {
+  async function handleCreateConsultation() {
+    if (
+      !consultationData.clientId ||
+      !consultationData.nutritionistId ||
+      !consultationData.startTime ||
+      !consultationData.duration
+    ) {
+      showAlert(
+        "Falha no envio",
+        "Preencha todos os campos do formulário",
+        "warning"
+      )
+      return;
+    }
 
-  //   const response = await api.post('/consultations', {
-  //     headers: { "Authorization": `Bearer ${userToken}` },
-  //     data: {
+    try {
 
-  //     }
-  //   })
+      const response = await api.post('/consultations',
+        {
+          startTime: consultationData.startTime,
+          durationInMinutes: consultationData.duration,
+          nutritionistId: consultationData.nutritionistId,
+          clientId: consultationData.clientId
+        },
+        {
+          headers: { "Authorization": `Bearer ${userToken}` }
+        }
+      )
 
-  //   if (response.status === 200)
-  //     createEventCallback()
+      if (response.status !== 201)
+        throw new Error("Create consultation request Failed.")
 
-  // }
+      const newConsultationData = response.data.consultation
+
+      showAlert(
+        "Sucesso",
+        "Consulta agendada com sucesso",
+        "success"
+      )
+      closeModal()
+      addCalendarEvent({
+        id: newConsultationData._id,
+        nutritionist: {
+          id: newConsultationData.nutritionist._id,
+          name: newConsultationData.nutritionist.name
+        },
+        client: newConsultationData.client.name,
+        startTime: newConsultationData.start_time,
+        endTime: newConsultationData.end_time
+      })
+
+    
+      //eslint-disable-next-line
+    }catch(err){
+      showAlert(
+        "Erro",
+        "Não foi possível realizar o agendamento.",
+        "error"
+      )
+    }
+
+  }
 
   useEffect(() => {
 
@@ -110,30 +170,52 @@ export function CreateConsultation() {
       title={"Agendar Consulta"}
       consultation={{
         nutritionist: {
-          value: consultationData.nutritionistId,
-          onChange: (newNutritionist) => (setConsultationData((prev) => ({
-            ...prev,
-            nutritionistId: newNutritionist
-          }))),
-          options: Array.from(nutritionistsData.values()).map(
+          value: consultationData.nutritionistId ? consultationData.nutritionistId : DEFAULT_SELECT_VALUE,
+          onChange: (newNutritionist) => {
+
+            if (newNutritionist !== DEFAULT_SELECT_VALUE)
+              setConsultationData((prev) => ({
+                ...prev,
+                nutritionistId: newNutritionist
+              }))
+
+          },
+          options: [
+            {
+              value: DEFAULT_SELECT_VALUE,
+              label: 'Selecione um nutricionista'
+            },
+            ...Array.from(nutritionistsData.values()).map(
               nutritionist => ({
-              value: nutritionist.id,
-              label: `${nutritionist.name} (${nutritionist.email})`
-            })
-          )
+                value: nutritionist.id,
+                label: `${nutritionist.name} (${nutritionist.email})`
+              })
+            )
+          ]
         },
         client: {
-          value: consultationData.clientId,
-          onChange: (newClient) => (setConsultationData((prev) => ({
-            ...prev,
-            clientId: newClient
-          }))),
-          options: Array.from(clientsData.values()).map(
+          value: consultationData.clientId ? consultationData.clientId : DEFAULT_SELECT_VALUE,
+          onChange: (newClient) => {
+
+            if (newClient !== DEFAULT_SELECT_VALUE)
+              setConsultationData((prev) => ({
+                ...prev,
+                clientId: newClient
+              }))
+
+          },
+          options: [
+            {
+              value: DEFAULT_SELECT_VALUE,
+              label: 'Selecione um cliente'
+            },
+            ...Array.from(clientsData.values()).map(
               client => ({
-              value: client.id,
-              label: `${client.name} (${client.cpf})`
-            })
-          )
+                value: client.id,
+                label: `${client.name} (${client.cpf})`
+              })
+            )
+          ]
         },
         startTime: {
           value: consultationData.startTime,
@@ -179,7 +261,13 @@ export function CreateConsultation() {
         },
       }}
     >
-      <Button size={"large"} color={'success'} variant="contained" startIcon={<Add />}>
+      <Button
+        size={"large"}
+        color={'success'}
+        variant="contained"
+        startIcon={<Add />}
+        onClick={handleCreateConsultation}
+      >
         Agendar
       </Button>
     </ConsultationModal>

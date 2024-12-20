@@ -1,17 +1,9 @@
+import { DialogContent, IconButton } from "@mui/material";
 import { styled } from "@mui/material/styles"
-import * as Dialog from "@radix-ui/react-dialog";
 
-export const Overlay = styled(Dialog.Overlay)(() => ({
-  position: 'fixed',
-  inset: 0,
-  width: '100vw',
-  height: '100vh',
-  background: 'rgba(0, 0, 0, 0.75)',
-  zIndex: '1'
-}));
+export const Content = styled(DialogContent)(({theme}) => ({
 
-export const Content = styled(Dialog.Content)(({theme}) => ({
-
+  padding: 0,
   minWidth: '64rem',
   borderRadius: '6px',
   overflow: 'hidden',
@@ -21,7 +13,7 @@ export const Content = styled(Dialog.Content)(({theme}) => ({
   top: '50%',
   left: '50%',
   transform: 'translate(-50%, -50%)',
-  zIndex: '2',
+  zIndex: '2000',
 
   display: 'flex',
   flexDirection: 'column',
@@ -30,7 +22,7 @@ export const Content = styled(Dialog.Content)(({theme}) => ({
 
 }));
 
-export const CloseButton = styled(Dialog.Close)(({theme}) => ({
+export const CloseButton = styled(IconButton)(({theme}) => ({
 
   background: 'transparent',
   border: 0,

@@ -1,6 +1,6 @@
 import { createContext, ReactNode, useReducer } from "react";
-import { CalendarViewReducer, CalendarViewState } from "../reducers/calendar-view-reducer/reducer";
-import { newCalendarViewAction, removeConsultationEventAction } from "../reducers/calendar-view-reducer/actions";
+import { CalendarViewReducer, CalendarViewState, ConsultationEvent } from "../reducers/calendar-view-reducer/reducer";
+import { addConsultationEventAction, newCalendarViewAction, removeConsultationEventAction } from "../reducers/calendar-view-reducer/actions";
 
 interface CalendarEventsContextProviderProps {
   children: ReactNode
@@ -9,7 +9,8 @@ interface CalendarEventsContextProviderProps {
 interface CalendarEventsContextType {
   calendarViewState: CalendarViewState,
   refreshCalendarEvents: (newConsultationsData : CalendarViewState['consultationsEvents'], startDate : Date, endDate : Date) => void,
-  removeCalendarEvent: (consultationId : string) => void
+  removeCalendarEvent: (consultationId : string) => void,
+  addCalendarEvent: (newConsultation : ConsultationEvent) => void
 }
 
 export const CalendarEventsContext = createContext({} as CalendarEventsContextType)
@@ -41,12 +42,17 @@ export function CalendarEventsContextProvider({ children }: CalendarEventsContex
     dispatch(removeConsultationEventAction(consultationId))
   }
 
+  function addCalendarEvent(newConsultation : ConsultationEvent){
+    dispatch(addConsultationEventAction(newConsultation))
+  }
+
   return (
     <CalendarEventsContext.Provider
       value={{
         calendarViewState,
         refreshCalendarEvents,
-        removeCalendarEvent
+        removeCalendarEvent,
+        addCalendarEvent
       }}
     >
       {children}

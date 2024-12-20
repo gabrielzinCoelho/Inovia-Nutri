@@ -1,4 +1,6 @@
+import { DateRange } from "@mui/icons-material"
 import { ActionTypes } from "./actions"
+import dayjs from "dayjs"
 
 export interface DateRange {
   startDate: Date,
@@ -12,7 +14,7 @@ export interface ConsultationEvent {
   nutritionist: {
     id: string,
     name: string
-  }, 
+  },
   client: string
 }
 
@@ -21,13 +23,20 @@ export interface CalendarViewState {
   dateRange: DateRange | null
 }
 
-//eslint-disable-next-line
-export function CalendarViewReducer(state : CalendarViewState, action : any){
+function isDateContained(startDateInterval: Date, endDateInterval: Date, date : Date) {
+  return (
+    (dayjs(date).isAfter(startDateInterval) || dayjs(date).isSame(startDateInterval)) &&
+    (dayjs(date).isBefore(endDateInterval) || dayjs(date).isSame(endDateInterval))
+  )
+}
 
-  switch(action.type){
+//eslint-disable-next-line
+export function CalendarViewReducer(state: CalendarViewState, action: any) {
+
+  switch (action.type) {
 
     case ActionTypes.NEW_CALENDAR_VIEW: {
-      const {consultationsEvents, dateRange} = action.payload
+      const { consultationsEvents, dateRange } = action.payload
 
       return {
         consultationsEvents,
@@ -44,6 +53,28 @@ export function CalendarViewReducer(state : CalendarViewState, action : any){
         consultationsEvents: consultationsEventsWithoutRemoved,
         dateRange: state.dateRange
       }
+
+    }
+
+    case ActionTypes.ADD_CONSULTATION_EVENT: {
+
+      const { newConsultationEvent } = action.payload as { newConsultationEvent: ConsultationEvent }
+
+      if (!state.dateRange)
+        return state
+
+      return (
+        isDateContained(state.dateRange.startDate, state.dateRange.endDate, newConsultationEvent.startTime) ||
+        isDateContained(state.dateRange.startDate, state.dateRange.endDate, newConsultationEvent.endTime)
+      ) ?
+        {
+          consultationsEvents: [
+            ...state.consultationsEvents,
+            newConsultationEvent
+          ],
+          dateRange: state.dateRange
+        } 
+        : state
 
     }
 

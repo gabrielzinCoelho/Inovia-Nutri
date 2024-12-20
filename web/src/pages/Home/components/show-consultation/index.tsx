@@ -8,6 +8,7 @@ import { Edit} from "@mui/icons-material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ConsultationModalContext } from "../../contexts/consultation-modal-context";
 import { CalendarEventsContext } from "../../contexts/calendar-events-context";
+import { AlertContext } from "../../contexts/alerts-context";
 
 interface ShowConsultationProps {
   consultationId: string,
@@ -38,6 +39,7 @@ export function ShowConsultation({consultationId} : ShowConsultationProps) {
   const { token: userToken } = useAppSelector(store => store.auth)
   const { closeModal } = useContext(ConsultationModalContext)
   const {removeCalendarEvent} = useContext(CalendarEventsContext)
+  const {showAlert} = useContext(AlertContext)
 
   const [consultationData, setConsultationData] = useState<ConsultationData | null>(null)
 
@@ -50,6 +52,7 @@ export function ShowConsultation({consultationId} : ShowConsultationProps) {
     if(response.status === 200){
       closeModal()
       removeCalendarEvent(consultationId)
+      showAlert('Sucesso', 'Consulta removida com sucesso', 'success')
     }
       
 
@@ -93,12 +96,18 @@ export function ShowConsultation({consultationId} : ShowConsultationProps) {
         title={"Detalhes da Consulta"}
         consultation={{
           nutritionist: {
-            value: `${consultationData?.nutritionist.name} (${consultationData?.nutritionist.email})`,
-            options: []
+            value: consultationData?.nutritionist.name,
+            options: [{
+              value: consultationData?.nutritionist.name,
+              label: `${consultationData?.nutritionist.name} (${consultationData?.nutritionist.email})`
+            }]
           },
           client:{
-            value: `${consultationData?.client.name} (${consultationData?.client.cpf})`,
-            options: []
+            value: consultationData?.client.name,
+            options: [{
+              value: consultationData?.client.name,
+              label: `${consultationData?.client.name} (${consultationData?.client.cpf})`
+            }]
           },
           startTime: {
             value: consultationData.startTime

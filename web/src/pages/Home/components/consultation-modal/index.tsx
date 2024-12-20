@@ -1,19 +1,18 @@
-import * as Dialog from "@radix-ui/react-dialog";
-import { ButtonsContainer, ClientData, CloseButton, ConsultationForm, Content, ContentBody, ContentHeader, NutritionistData, Overlay } from "./styles";
-import { Close, WatchLater } from "@mui/icons-material";
-import { InputAdornment, MenuItem, TextField } from "@mui/material";
-import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
-import { ReactNode } from "react";
+import { ButtonsContainer, ClientData, CloseButton, ConsultationForm, Content, ContentBody, ContentHeader, NutritionistData } from "./styles";
+import { WatchLater } from "@mui/icons-material";
+import { Dialog, InputAdornment, MenuItem, Portal, TextField } from "@mui/material";
+import { ReactNode, useContext } from "react";
 import dayjs from "dayjs";
+import CloseIcon from '@mui/icons-material/Close';
+import { ConsultationModalContext } from "../../contexts/consultation-modal-context";
 
-
-interface TextFieldProps<T>{
+interface TextFieldProps<T> {
 
   value?: T | null,
-  onChange?: (newValue : T) => void,
+  onChange?: (newValue: T) => void,
 }
 
-interface SelectProps<T> extends TextFieldProps<T>{
+interface SelectProps<T> extends TextFieldProps<T> {
 
   options: {
     value: T,
@@ -21,7 +20,7 @@ interface SelectProps<T> extends TextFieldProps<T>{
   }[],
 }
 
-interface ConsultationModalProps{
+interface ConsultationModalProps {
   isEditable: boolean,
   title: string,
   consultation: {
@@ -52,152 +51,176 @@ export function ConsultationModal({
   nutritionist,
   client,
   children
-} : ConsultationModalProps) {
+}: ConsultationModalProps) {
+
+  const { closeModal, modalState } = useContext(ConsultationModalContext)
 
   return (
-    <Dialog.Portal>
-      <Overlay />
-      <VisuallyHidden.Root>
-        <Dialog.Title>{title}</Dialog.Title>
-      </VisuallyHidden.Root>
-      <Content>
-        <ContentHeader>
-          <h1>{title}</h1>
-          <CloseButton>
-            <Close />
-          </CloseButton>
-        </ContentHeader>
-        <ContentBody>
-          <ConsultationForm>
-            <TextField 
-              label="Nutricionista"
-              variant="filled"
-              disabled={!isEditable}
-              value={consultation.nutritionist.value}
-              onChange={(e)=>(consultation.nutritionist.onChange?.(e.target.value))}
-              slotProps={{ inputLabel: { shrink: true } }}
-              select
+    <Dialog 
+      open={modalState.isOpen} 
+      onClose={closeModal}
+    >
+      <Portal>
+        <Content>
+          <ContentHeader>
+            <h1>{title}</h1>
+            <CloseButton
+              aria-label="close"
+              onClick={closeModal}
             >
-              {consultation.nutritionist.options.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField 
-              label="Cliente"
-              variant="filled"
-              disabled={!isEditable}
-              value={consultation.client.value}
-              onChange={(e)=>(consultation.client.onChange?.(e.target.value))}
-              slotProps={{ inputLabel: { shrink: true } }}
-              select
-            >
-              {consultation.client.options.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
-            <TextField 
-              label="Data e Hora"
-              variant="filled"
-              disabled={!isEditable}
-              type="datetime-local"
-              slotProps={{ inputLabel: { shrink: true } }}
-              value={dayjs(consultation.startTime.value).format("YYYY-MM-DDTHH:mm")}
-              onChange={(e)=>(consultation.startTime.onChange?.(new Date(e.target.value)))}      
-            />
-            <TextField 
-              label="Duração Estimada (min)"
-              slotProps={{
-                input: {
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <WatchLater />
-                    </InputAdornment>
-                  ),
-                },
-                inputLabel: { shrink: true }
-              }} 
-              variant="filled" 
-              disabled={!isEditable}
-              value={consultation.duration.value}
-              onChange={(e)=>(consultation.duration.onChange?.(parseInt(e.target.value)))}  
-            />
-          </ConsultationForm>
-          <NutritionistData>
-            <h3>Nutricionista</h3>
-            <div>
-              <TextField 
-                label="Nome"
+              <CloseIcon />
+            </CloseButton>
+          </ContentHeader>
+          <ContentBody>
+            <ConsultationForm>
+              <TextField
+                label="Nutricionista"
                 variant="filled"
-                disabled
-                value={nutritionist.name.value}
-                slotProps={{ inputLabel: { shrink: true } }}
-              />
-              <TextField 
-                label="Email"
+                disabled={!isEditable}
+                value={consultation.nutritionist.value}
+                onChange={(e) => (consultation.nutritionist.onChange?.(e.target.value))}
+                slotProps={{ 
+                  inputLabel: { shrink: true },
+                  select: {
+                    MenuProps: {
+                      style: {
+                        zIndex: '2000'
+                      }
+                    }
+                  } 
+                }}
+                select
+              >
+                {consultation.nutritionist.options.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="Cliente"
                 variant="filled"
-                disabled
-                value={nutritionist.email.value}
+                disabled={!isEditable}
+                value={consultation.client.value}
+                onChange={(e) => (consultation.client.onChange?.(e.target.value))}
+                slotProps={{ 
+                  inputLabel: { shrink: true },
+                  select: {
+                    MenuProps: {
+                      style: {
+                        zIndex: '2002'
+                      }
+                    }
+                  } 
+                }}
+                select
+              >
+                {consultation.client.options.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </TextField>
+              <TextField
+                label="Data e Hora"
+                variant="filled"
+                disabled={!isEditable}
+                type="datetime-local"
                 slotProps={{ inputLabel: { shrink: true } }}
+                value={dayjs(consultation.startTime.value).format("YYYY-MM-DDTHH:mm")}
+                onChange={(e) => (consultation.startTime.onChange?.(new Date(e.target.value)))}
               />
-            </div>
-          </NutritionistData>
-          <ClientData>
-          <h3>Cliente</h3>
-            <div>
               <TextField
-                label="Nome"
-                variant="filled" 
-                disabled 
-                value={client.name.value}
-                slotProps={{ inputLabel: { shrink: true } }}
+                label="Duração Estimada (min)"
+                slotProps={{
+                  input: {
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <WatchLater />
+                      </InputAdornment>
+                    ),
+                  },
+                  inputLabel: { shrink: true }
+                }}
+                variant="filled"
+                disabled={!isEditable}
+                value={consultation.duration.value}
+                onChange={(e) => (consultation.duration.onChange?.(parseInt(e.target.value)))}
+              />
+            </ConsultationForm>
+            <NutritionistData>
+              <h3>Nutricionista</h3>
+              <div>
+                <TextField
+                  label="Nome"
+                  variant="filled"
+                  disabled
+                  value={nutritionist.name.value}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
-              <TextField
-                label="Biotipo"
-                variant="filled" 
-                disabled 
-                value={client.biotype.value}
-                slotProps={{ inputLabel: { shrink: true } }}
+                <TextField
+                  label="Email"
+                  variant="filled"
+                  disabled
+                  value={nutritionist.email.value}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
-              <TextField
-                label="CPF"
-                variant="filled" 
-                disabled 
-                value={client.cpf.value}
-                slotProps={{ inputLabel: { shrink: true } }}
+              </div>
+            </NutritionistData>
+            <ClientData>
+              <h3>Cliente</h3>
+              <div>
+                <TextField
+                  label="Nome"
+                  variant="filled"
+                  disabled
+                  value={client.name.value}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
-              <TextField
-                label="Data de Nascimento"
-                variant="filled" 
-                disabled
-                type='datetime-local' 
-                value={dayjs(client.dateOfBirth.value).format("YYYY-MM-DDTHH:mm")}
-                slotProps={{ inputLabel: { shrink: true } }}
+                <TextField
+                  label="Biotipo"
+                  variant="filled"
+                  disabled
+                  value={client.biotype.value}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
-              <TextField
-                label="Email"
-                variant="filled" 
-                disabled 
-                value={client.email.value}
-                slotProps={{ inputLabel: { shrink: true } }}
+                <TextField
+                  label="CPF"
+                  variant="filled"
+                  disabled
+                  value={client.cpf.value}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
-              <TextField
-                label="Telefone"
-                variant="filled" 
-                disabled 
-                value={client.phone.value}
-                slotProps={{ inputLabel: { shrink: true } }}
+                <TextField
+                  label="Data de Nascimento"
+                  variant="filled"
+                  disabled
+                  type='datetime-local'
+                  value={dayjs(client.dateOfBirth.value).format("YYYY-MM-DDTHH:mm")}
+                  slotProps={{ inputLabel: { shrink: true } }}
                 />
-            </div>
-          </ClientData>
-          <ButtonsContainer>
+                <TextField
+                  label="Email"
+                  variant="filled"
+                  disabled
+                  value={client.email.value}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+                <TextField
+                  label="Telefone"
+                  variant="filled"
+                  disabled
+                  value={client.phone.value}
+                  slotProps={{ inputLabel: { shrink: true } }}
+                />
+              </div>
+            </ClientData>
+            <ButtonsContainer>
               {children}
-          </ButtonsContainer>
-        </ContentBody>
-      </Content>
-    </Dialog.Portal>
+            </ButtonsContainer>
+          </ContentBody>
+        </Content>
+      </Portal>
+    </Dialog>
   )
 }

@@ -58,30 +58,6 @@ function isIntervalContained(startDateA: Date, endDateA: Date, startDateB: Date,
     (dayjs(endDateA).isAfter(endDateB) || dayjs(endDateA).isSame(endDateB))
 }
 
-async function fetchConsultationsEvents(dateRange: DateRange, userToken: string): Promise<ConsultationEvent[]> {
-
-  const response = await api.get('/consultations', {
-    headers: { "Authorization": `Bearer ${userToken}` },
-    params: {
-      minStartTime: dateRange.startDate,
-      maxStartTime: dateRange.endDate
-    }
-  });
-
-  const data = response.data.consultations
-
-  return data.map((consultationData: FetchConsultationsApiResponse) => ({
-
-    id: consultationData['_id'],
-    startTime: consultationData.start_time,
-    endTime: consultationData.end_time,
-    nutritionist: {
-      id: consultationData.nutritionist._id,
-      name: consultationData.nutritionist.name
-    },
-    client: consultationData.client.name
-  }));
-}
 export function Calendar() {
 
   const { token: userToken } = useAppSelector(store => store.auth)
@@ -91,6 +67,32 @@ export function Calendar() {
   const [notifyAlert, setNotifyAlert] = useState<NotifyAlertState>({
     isOpen: false
   })
+
+
+  async function fetchConsultationsEvents(dateRange: DateRange): Promise<ConsultationEvent[]> {
+
+    const response = await api.get('/consultations', {
+      headers: { "Authorization": `Bearer ${userToken}` },
+      params: {
+        minStartTime: dateRange.startDate,
+        maxStartTime: dateRange.endDate
+      }
+    });
+  
+    const data = response.data.consultations
+  
+    return data.map((consultationData: FetchConsultationsApiResponse) => ({
+  
+      id: consultationData['_id'],
+      startTime: consultationData.start_time,
+      endTime: consultationData.end_time,
+      nutritionist: {
+        id: consultationData.nutritionist._id,
+        name: consultationData.nutritionist.name
+      },
+      client: consultationData.client.name
+    }));
+  }
 
   async function handleDatesSet({ end, start }: DatesSetArg) {
 
@@ -105,28 +107,13 @@ export function Calendar() {
       const newConsultationsData = await fetchConsultationsEvents({
         startDate: calendarShowingStartDate,
         endDate: calendarShowingEndDate
-      },
-        userToken!
+      }
       )
 
       refreshCalendarEvents(newConsultationsData, calendarShowingStartDate, calendarShowingEndDate)
 
     }
   }
-
-  // function removeConsultationEventCallback(consultationId : string){
-
-  //   dispatch(
-  //     removeConsultationEventAction(consultationId)
-  //   )
-  //   setNotifyAlert({
-  //     isOpen: true,
-  //     title: 'Sucesso', 
-  //     message: 'Consulta removida com sucesso.', 
-  //     variant: 'standard',
-  //     severity: 'success'
-  //   })
-  // }
 
   function handleEventClick(arg: EventClickArg) {
     selectViewModal(arg.event.extendedProps.consultationId)
