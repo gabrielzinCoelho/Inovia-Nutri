@@ -27,7 +27,7 @@ interface ConsultationModalProps {
     nutritionist: SelectProps<string>,
     client: SelectProps<string>,
     startTime: TextFieldProps<Date>,
-    duration: TextFieldProps<number>
+    duration: TextFieldProps<string>
   },
   nutritionist: {
     name: TextFieldProps<string>,
@@ -140,12 +140,20 @@ export function ConsultationModal({
                       </InputAdornment>
                     ),
                   },
-                  inputLabel: { shrink: true }
+                  inputLabel: { shrink: true },
                 }}
                 variant="filled"
                 disabled={!isEditable}
                 value={consultation.duration.value}
-                onChange={(e) => (consultation.duration.onChange?.(parseInt(e.target.value)))}
+                onChange={(e) => {
+                  if(!e.target.value || e.target.value === '-')
+                    consultation.duration.onChange?.('')
+                  else {
+                    const value = parseInt(e.target.value, 10);
+                    if(!isNaN(value))
+                      consultation.duration.onChange?.(e.target.value)
+                  }
+                }}
               />
             </ConsultationForm>
             <NutritionistData>

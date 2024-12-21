@@ -3,10 +3,11 @@ import { useAppSelector } from "../../../../store";
 import { api } from "../../../../lib/axios";
 import { ConsultationModal } from "../consultation-modal";
 import { Button } from "@mui/material";
-import { Add } from "@mui/icons-material";
+import { Edit } from "@mui/icons-material";
+import dayjs from "dayjs";
 import { AlertContext } from "../../contexts/alerts-context";
-import { CalendarEventsContext } from "../../contexts/calendar-events-context";
 import { ConsultationModalContext } from "../../contexts/consultation-modal-context";
+import { CalendarEventsContext } from "../../contexts/calendar-events-context";
 
 interface ConsultationData {
   startTime: Date | null,
@@ -34,16 +35,18 @@ interface ClientData {
 
 const DEFAULT_SELECT_VALUE = 'DEFAULT_SELECT_VALUE'
 
-export function CreateConsultation() {
+export function EditConsultation() {
 
   const { token: userToken } = useAppSelector(store => store.auth)
   const { showAlert } = useContext(AlertContext)
   const { closeModal } = useContext(ConsultationModalContext)
-  const { addCalendarEvent } = useContext(CalendarEventsContext)
+  const {modalState} = useContext(ConsultationModalContext)
+  const { updateCalendarEvent } = useContext(CalendarEventsContext)
+
+  const {consultationId : currentConsultationId} = modalState
 
   const [nutritionistsData, setNutritionistsData] = useState<Map<string, NutritionistData>>(new Map())
   const [clientsData, setClientsData] = useState<Map<string, ClientData>>(new Map())
-
   const [consultationData, setConsultationData] = useState<ConsultationData>({
     startTime: null,
     duration: null,
@@ -51,7 +54,8 @@ export function CreateConsultation() {
     clientId: null
   })
 
-  async function handleCreateConsultation() {
+  async function handleEditConsultation(){
+
     if (
       !consultationData.clientId ||
       !consultationData.nutritionistId ||
@@ -68,7 +72,7 @@ export function CreateConsultation() {
 
     try {
 
-      const response = await api.post('/consultations',
+      const response = await api.put(`/consultations/${currentConsultationId}`,
         {
           startTime: consultationData.startTime,
           durationInMinutes: consultationData.duration,
@@ -80,18 +84,18 @@ export function CreateConsultation() {
         }
       )
 
-      if (response.status !== 201)
-        throw new Error("Create consultation request Failed.")
+      if (response.status !== 200)
+        throw new Error("Edit consultation request Failed.")
 
       const newConsultationData = response.data.consultation
 
       showAlert(
         "Sucesso",
-        "Consulta agendada com sucesso",
+        "Consulta atualizada com sucesso",
         "success"
       )
       closeModal()
-      addCalendarEvent({
+      updateCalendarEvent({
         id: newConsultationData._id,
         nutritionist: {
           id: newConsultationData.nutritionist._id,
@@ -107,7 +111,7 @@ export function CreateConsultation() {
     }catch(err){
       showAlert(
         "Erro",
-        "Não foi possível realizar o agendamento.",
+        "Não foi possível realizar as alterações.",
         "error"
       )
     }
@@ -115,6 +119,23 @@ export function CreateConsultation() {
   }
 
   useEffect(() => {
+
+    api.get(`consultations/${currentConsultationId}`, {
+      headers: { "Authorization": `Bearer ${userToken}` },
+    }).then(response => {
+
+      const consultation = response.data.consultation
+
+      setConsultationData({
+        startTime: consultation.start_time,
+        duration: dayjs(consultation.end_time).diff(dayjs(consultation.start_time), 'minutes')  ,
+        nutritionistId: consultation.nutritionist._id,
+        clientId: consultation.client._id
+      })
+
+    }
+
+  )
 
     api.get('/nutritionists', {
       headers: { "Authorization": `Bearer ${userToken}` },
@@ -162,7 +183,7 @@ export function CreateConsultation() {
 
     })
 
-  }, [userToken])
+  }, [userToken, currentConsultationId])
 
   return (
     <ConsultationModal
@@ -265,10 +286,10 @@ export function CreateConsultation() {
         size={"large"}
         color={'success'}
         variant="contained"
-        startIcon={<Add />}
-        onClick={handleCreateConsultation}
+        startIcon={<Edit />}
+        onClick={handleEditConsultation}
       >
-        Agendar
+        Editar
       </Button>
     </ConsultationModal>
 

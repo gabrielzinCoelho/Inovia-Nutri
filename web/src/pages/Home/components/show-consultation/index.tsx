@@ -10,10 +10,6 @@ import { ConsultationModalContext } from "../../contexts/consultation-modal-cont
 import { CalendarEventsContext } from "../../contexts/calendar-events-context";
 import { AlertContext } from "../../contexts/alerts-context";
 
-interface ShowConsultationProps {
-  consultationId: string,
-}
-
 interface ConsultationData {
 
   id: string,
@@ -34,33 +30,38 @@ interface ConsultationData {
 
 }
 
-export function ShowConsultation({consultationId} : ShowConsultationProps) {
+export function ShowConsultation() {
 
   const { token: userToken } = useAppSelector(store => store.auth)
-  const { closeModal } = useContext(ConsultationModalContext)
+  const { closeModal, selectEditModal } = useContext(ConsultationModalContext)
   const {removeCalendarEvent} = useContext(CalendarEventsContext)
   const {showAlert} = useContext(AlertContext)
+  const {modalState} = useContext(ConsultationModalContext)
+
+  const {consultationId : currentConsultationId} = modalState
 
   const [consultationData, setConsultationData] = useState<ConsultationData | null>(null)
 
   async function handleDeleteConsultation(){
 
-    const response = await api.delete(`consultations/${consultationId}`, {
+    const response = await api.delete(`consultations/${currentConsultationId}`, {
       headers: { "Authorization": `Bearer ${userToken}` },
     })
 
     if(response.status === 200){
       closeModal()
-      removeCalendarEvent(consultationId)
+      removeCalendarEvent(currentConsultationId!)
       showAlert('Sucesso', 'Consulta removida com sucesso', 'success')
     }
-      
+  }
 
+  async function handleEditConsultation(){
+    selectEditModal(currentConsultationId!)
   }
 
   useEffect(() => {
 
-    api.get(`consultations/${consultationId}`, {
+    api.get(`consultations/${currentConsultationId}`, {
       headers: { "Authorization": `Bearer ${userToken}` },
     }).then(response => {
       
@@ -84,7 +85,7 @@ export function ShowConsultation({consultationId} : ShowConsultationProps) {
       })
     })
    
-  }, [consultationId, userToken])
+  }, [currentConsultationId, userToken])
 
   return (
     <>
@@ -113,7 +114,7 @@ export function ShowConsultation({consultationId} : ShowConsultationProps) {
             value: consultationData.startTime
           },
           duration: {
-            value: consultationData.duration
+            value: consultationData.duration?.toString() ?? '',
           }
         }}
         nutritionist={{
@@ -145,7 +146,13 @@ export function ShowConsultation({consultationId} : ShowConsultationProps) {
           },
         }}
       >
-        <Button size={"large"} color={'success'} variant="contained" startIcon={<Edit />}>
+        <Button 
+          size={"large"}
+          color={'success'}
+          variant="contained"
+          startIcon={<Edit />}
+          onClick={handleEditConsultation}
+        >
               Editar
         </Button>
         <Button 

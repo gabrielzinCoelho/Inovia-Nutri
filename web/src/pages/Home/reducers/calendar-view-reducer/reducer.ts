@@ -78,6 +78,32 @@ export function CalendarViewReducer(state: CalendarViewState, action: any) {
 
     }
 
+    case ActionTypes.UPDATE_CONSULTATION_EVENT: {
+
+      const { updatedConsultationEvent } = action.payload as { updatedConsultationEvent: ConsultationEvent }
+
+      if (!state.dateRange)
+        return state
+
+      return (
+        isDateContained(state.dateRange.startDate, state.dateRange.endDate, updatedConsultationEvent.startTime) ||
+        isDateContained(state.dateRange.startDate, state.dateRange.endDate, updatedConsultationEvent.endTime)
+      ) ?
+        {
+          consultationsEvents: state.consultationsEvents.map(
+            consultationEvent => (
+              consultationEvent.id === updatedConsultationEvent.id ?
+              updatedConsultationEvent
+              :
+              consultationEvent
+            )
+          ),
+          dateRange: state.dateRange
+        } 
+        : state
+
+    }
+
     default:
       return state
 

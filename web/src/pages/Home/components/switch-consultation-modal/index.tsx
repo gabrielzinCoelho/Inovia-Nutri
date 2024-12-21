@@ -2,6 +2,7 @@ import { useContext } from "react"
 import { ConsultationModalContext } from "../../contexts/consultation-modal-context"
 import { ShowConsultation } from "../show-consultation";
 import { CreateConsultation } from "../create-consultation";
+import { EditConsultation } from "../edit-consultation";
 
 export function SwitchConsultationModal() {
 
@@ -11,7 +12,9 @@ export function SwitchConsultationModal() {
   function renderModal() {
     switch (modalState.modalSelected) {
       case "VIEW":
-        return <ShowConsultation consultationId={modalState.consultationId!} />;
+        return <ShowConsultation />;
+      case "EDIT":
+          return <EditConsultation />;
       case "CREATE":
         return <CreateConsultation />;
       default:
