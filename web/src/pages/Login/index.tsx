@@ -38,7 +38,6 @@ export function Login() {
         token: authResponse.data.token
       }))
     
-    // eslint-disable-next-line
     }catch(err){
 
         setUserPassword('')

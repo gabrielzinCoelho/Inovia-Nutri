@@ -112,8 +112,6 @@ export function EditConsultation() {
         endTime: newConsultationData.end_time
       })
 
-    
-      //eslint-disable-next-line
     }catch(err){
       showAlert(
         "Erro",
@@ -151,7 +149,7 @@ export function EditConsultation() {
 
       const nutritionistsResponse = response.data.nutritionists
       const newNutritionistMap = new Map()
-      //eslint-disable-next-line
+
       nutritionistsResponse.forEach((nutritionist: any) => {
         newNutritionistMap.set(
           nutritionist._id,
@@ -172,7 +170,7 @@ export function EditConsultation() {
 
       const clientsResponse = response.data.clients
       const newClientMap = new Map()
-      //eslint-disable-next-line
+
       clientsResponse.forEach((client: any) => {
         newClientMap.set(
           client._id,

@@ -21,7 +21,6 @@ async function getStoredToken() : Promise<string | null>{
 
     return token
 
-    //eslint-disable-next-line
   }catch(err){
 
     return null

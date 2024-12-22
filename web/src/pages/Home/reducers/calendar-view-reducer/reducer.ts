@@ -30,7 +30,6 @@ function isDateContained(startDateInterval: Date, endDateInterval: Date, date : 
   )
 }
 
-//eslint-disable-next-line
 export function CalendarViewReducer(state: CalendarViewState, action: any) {
 
   switch (action.type) {
