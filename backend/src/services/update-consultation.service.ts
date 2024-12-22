@@ -11,6 +11,8 @@ import { IsConsultationOverlappingService } from './is-consultation-overlapping.
 import { Nutritionist } from 'src/schemas/nutritionist.schema'
 import { Client } from 'src/schemas/client.schema'
 import { Biotype } from 'src/schemas/biotype.schema'
+import { FindNutritionistService } from './find-nutritionist.service'
+import { FindClientService } from './find-client.service'
 
 interface UpdateConsultationServiceParams {
   id: string
@@ -35,6 +37,8 @@ export class UpdateConsultationService {
     @InjectModel(Client.name) private clientModel: Model<Client>,
     @InjectModel(Biotype.name) private biotypeModel: Model<Biotype>,
     private isConsultationOverlapService: IsConsultationOverlappingService,
+    private findNutritionistService: FindNutritionistService,
+    private findClientService: FindClientService,
   ) {}
 
   async execute({
@@ -51,22 +55,13 @@ export class UpdateConsultationService {
     if (!consultation)
       throw new BadRequestException('Consultation does not exist.')
 
-    const nutritionist = isValidObjectId(nutritionistId)
-      ? await this.nutritionistModel.findById(
-          new Types.ObjectId(nutritionistId),
-        )
-      : false
+    const nutritionist = await this.findNutritionistService.execute({
+      id: nutritionistId,
+    })
 
-    if (!nutritionist)
-      throw new BadRequestException('Nutritionist does not exist.')
-
-    const client = isValidObjectId(clientId)
-      ? await this.clientModel
-          .findById(new Types.ObjectId(clientId))
-          .populate('biotype', '', this.biotypeModel)
-      : false
-
-    if (!client) throw new BadRequestException('Client does not exist.')
+    const client = await this.findClientService.execute({
+      id: clientId,
+    })
 
     const endTime = dayjs(startTime).add(durationInMinutes, 'minutes').toDate()
 

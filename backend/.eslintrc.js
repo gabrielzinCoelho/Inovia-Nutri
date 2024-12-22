@@ -24,6 +24,7 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'off',
     'no-useless-constructor': 'off',
     'camelcase': 'off',
-    "dot-notation": "off"
+    "dot-notation": "off",
+    'new-cap': 'off'
   },
 };

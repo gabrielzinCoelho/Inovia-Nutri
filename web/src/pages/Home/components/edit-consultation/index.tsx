@@ -13,7 +13,9 @@ interface ConsultationData {
   startTime: Date | null,
   duration: number | null,
   nutritionistId: string | null,
-  clientId: string | null
+  clientId: string | null,
+  recurrenceInterval: number | null,
+  recurrenceEndData: Date | null,
 }
 
 interface NutritionistData {
@@ -51,7 +53,9 @@ export function EditConsultation() {
     startTime: null,
     duration: null,
     nutritionistId: null,
-    clientId: null
+    clientId: null,
+    recurrenceEndData: null,
+    recurrenceInterval: null
   })
 
   async function handleEditConsultation(){
@@ -77,7 +81,9 @@ export function EditConsultation() {
           startTime: consultationData.startTime,
           durationInMinutes: consultationData.duration,
           nutritionistId: consultationData.nutritionistId,
-          clientId: consultationData.clientId
+          clientId: consultationData.clientId,
+          recurrenceEndData: consultationData.recurrenceEndData,
+          recurrenceInterval: consultationData.recurrenceInterval
         },
         {
           headers: { "Authorization": `Bearer ${userToken}` }
@@ -130,7 +136,9 @@ export function EditConsultation() {
         startTime: consultation.start_time,
         duration: dayjs(consultation.end_time).diff(dayjs(consultation.start_time), 'minutes')  ,
         nutritionistId: consultation.nutritionist._id,
-        clientId: consultation.client._id
+        clientId: consultation.client._id,
+        recurrenceEndData: consultation.recurrence_end_time ?? null,
+        recurrenceInterval: consultation.recurrence_interval ?? null,
       })
 
     }
@@ -251,34 +259,43 @@ export function EditConsultation() {
             ...prev,
             duration: newDuration === '' ? null : parseInt(newDuration)
           })))
+        },
+        isRecurrent: {
+          value: (!!consultationData.recurrenceInterval && !!consultationData.recurrenceEndData),
+        },
+        recurrenceInterval: {
+          value: consultationData.recurrenceInterval?.toString() ?? '' 
+        },
+        recurrenceEndDate: {
+          value: consultationData.recurrenceEndData
         }
       }}
       nutritionist={{
         name: {
-          value: consultationData.nutritionistId ? nutritionistsData.get(consultationData.nutritionistId)?.name : ''
+          value: consultationData.nutritionistId ? nutritionistsData.get(consultationData.nutritionistId)!.name : ''
         },
         email: {
-          value: consultationData.nutritionistId ? nutritionistsData.get(consultationData.nutritionistId)?.email : ''
+          value: consultationData.nutritionistId ? nutritionistsData.get(consultationData.nutritionistId)!.email : ''
         }
       }}
       client={{
         name: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.name : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.name : ''
         },
         biotype: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.biotype : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.biotype : ''
         },
         cpf: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.cpf : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.cpf : ''
         },
         dateOfBirth: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.dateOfBirth : null
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.dateOfBirth : null
         },
         email: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.email : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.email : ''
         },
         phone: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.phone : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.phone : ''
         },
       }}
     >

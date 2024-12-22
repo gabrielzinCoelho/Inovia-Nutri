@@ -18,6 +18,7 @@ import { DeleteConsultationService } from 'src/services/delete-consultation.serv
 import { DeleteConsultationController } from 'src/controllers/delete-consultation.controller'
 import { UpdateConsultationService } from 'src/services/update-consultation.service'
 import { UpdateConsultationController } from 'src/controllers/update-consultation.controller'
+import { CreateRecurrentConsultationService } from 'src/services/create-recurrent-consultation.service'
 
 @Module({
   imports: [
@@ -37,6 +38,7 @@ import { UpdateConsultationController } from 'src/controllers/update-consultatio
   ],
   providers: [
     CreateConsultationService,
+    CreateRecurrentConsultationService,
     IsConsultationOverlappingService,
     ShowConsultationService,
     FetchConsultationService,

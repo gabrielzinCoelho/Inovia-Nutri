@@ -8,6 +8,7 @@ import {
 } from 'src/schemas/nutritionist.schema'
 import { CreateNutritionistService } from 'src/services/create-nutritionist.service'
 import { FetchNutritionistsService } from 'src/services/fetch-nutritionists.service'
+import { FindNutritionistService } from 'src/services/find-nutritionist.service'
 
 @Module({
   imports: [
@@ -16,7 +17,11 @@ import { FetchNutritionistsService } from 'src/services/fetch-nutritionists.serv
     ]),
   ],
   controllers: [CreateNutritionistController, FetchNutritionistsController],
-  providers: [CreateNutritionistService, FetchNutritionistsService],
-  exports: [MongooseModule],
+  providers: [
+    CreateNutritionistService,
+    FetchNutritionistsService,
+    FindNutritionistService,
+  ],
+  exports: [MongooseModule, FindNutritionistService],
 })
 export class NutritionistModule {}

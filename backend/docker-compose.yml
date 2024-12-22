@@ -1,13 +1,11 @@
 services:
   inovia-nutri-mongo:
-    image: mongodb/mongodb-community-server:6.0-ubi8
+    image: 'bitnami/mongodb:latest'
     container_name: inovia-nutri-mongo
     ports:
       - 27017:27017
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=user
-      - MONGO_INITDB_ROOT_PASSWORD=pass
+      - MONGODB_ROOT_USER=root
+      - MONGODB_ROOT_PASSWORD=root
     volumes:
-      - type: bind
-        source: ./mongo-data
-        target: /data/db
+      - ./mongo-data:/bitnami/mongodb

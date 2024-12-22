@@ -1,16 +1,14 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-} from '@nestjs/common'
+import { ConflictException, Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import * as dayjs from 'dayjs'
-import { isValidObjectId, Model, Types } from 'mongoose'
+import { Model } from 'mongoose'
 import { Consultation } from 'src/schemas/consultation.schema'
 import { IsConsultationOverlappingService } from './is-consultation-overlapping.service'
 import { Nutritionist } from 'src/schemas/nutritionist.schema'
 import { Client } from 'src/schemas/client.schema'
 import { Biotype } from 'src/schemas/biotype.schema'
+import { FindNutritionistService } from './find-nutritionist.service'
+import { FindClientService } from './find-client.service'
 
 interface CreateConsultationServiceParams {
   startTime: Date
@@ -34,6 +32,8 @@ export class CreateConsultationService {
     @InjectModel(Client.name) private clientModel: Model<Client>,
     @InjectModel(Biotype.name) private biotypeModel: Model<Biotype>,
     private isConsultationOverlapService: IsConsultationOverlappingService,
+    private findNutritionistService: FindNutritionistService,
+    private findClientService: FindClientService,
   ) {}
 
   async execute({
@@ -42,22 +42,11 @@ export class CreateConsultationService {
     nutritionistId,
     clientId,
   }: CreateConsultationServiceParams): Promise<CreateConsultationServiceResponse> {
-    const nutritionist = isValidObjectId(nutritionistId)
-      ? await this.nutritionistModel.findById(
-          new Types.ObjectId(nutritionistId),
-        )
-      : false
+    const nutritionist = await this.findNutritionistService.execute({
+      id: nutritionistId,
+    })
 
-    if (!nutritionist)
-      throw new BadRequestException('Nutritionist does not exist.')
-
-    const client = isValidObjectId(clientId)
-      ? await this.clientModel
-          .findById(new Types.ObjectId(clientId))
-          .populate('biotype', '', this.biotypeModel)
-      : false
-
-    if (!client) throw new BadRequestException('Client does not exist.')
+    const client = await this.findClientService.execute({ id: clientId })
 
     const endTime = dayjs(startTime).add(durationInMinutes, 'minutes').toDate()
 
@@ -76,6 +65,8 @@ export class CreateConsultationService {
       end_time: endTime,
       nutritionist: nutritionistId,
       client: clientId,
+      recurrence_interval: null,
+      recurrence_end_time: null,
     })
 
     return {

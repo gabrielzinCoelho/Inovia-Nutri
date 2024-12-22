@@ -3,7 +3,7 @@ import { ConsultationEvent, DateRange } from "./reducer";
 export enum ActionTypes {
   NEW_CALENDAR_VIEW = 'NEW_CALENDAR_VIEW',
   REMOVE_CONSULTATION_EVENT = 'REMOVE_CONSULTATION_EVENT',
-  ADD_CONSULTATION_EVENT = 'ADD_CONSULTATION_EVENT',
+  ADD_CONSULTATION_EVENTS = 'ADD_CONSULTATION_EVENTS',
   UPDATE_CONSULTATION_EVENT = 'UPDATE_CONSULTATION_EVENT'
 }
 
@@ -30,12 +30,12 @@ export function removeConsultationEventAction(consultationId : string){
 
 }
 
-export function addConsultationEventAction(newConsultationEvent: ConsultationEvent){
+export function addConsultationEventsAction(newConsultationEvents: ConsultationEvent[]){
 
   return {
-    type: ActionTypes.ADD_CONSULTATION_EVENT,
+    type: ActionTypes.ADD_CONSULTATION_EVENTS,
     payload: {
-      newConsultationEvent
+      newConsultationEvents
     }
   }
 

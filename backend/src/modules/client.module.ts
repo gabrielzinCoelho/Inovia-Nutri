@@ -4,6 +4,7 @@ import { FetchClientsController } from 'src/controllers/fetch-clients.controller
 import { Client, ClientSchema } from 'src/schemas/client.schema'
 import { FetchClientsService } from 'src/services/fetch-clients.service'
 import { BiotypeModule } from './biotype.module'
+import { FindClientService } from 'src/services/find-client.service'
 
 @Module({
   imports: [
@@ -11,7 +12,7 @@ import { BiotypeModule } from './biotype.module'
     BiotypeModule,
   ],
   controllers: [FetchClientsController],
-  providers: [FetchClientsService],
-  exports: [MongooseModule],
+  providers: [FetchClientsService, FindClientService],
+  exports: [MongooseModule, FindClientService],
 })
 export class ClientModule {}

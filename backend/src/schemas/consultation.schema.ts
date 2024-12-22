@@ -26,6 +26,12 @@ export class Consultation {
     required: true,
   })
   client: Client
+
+  @Prop()
+  recurrence_interval: mongoose.Schema.Types.Number
+
+  @Prop()
+  recurrence_end_time: Date
 }
 
 export type ConsultationDocument = mongoose.HydratedDocument<Consultation>

@@ -56,25 +56,25 @@ export function CalendarViewReducer(state: CalendarViewState, action: any) {
 
     }
 
-    case ActionTypes.ADD_CONSULTATION_EVENT: {
+    case ActionTypes.ADD_CONSULTATION_EVENTS: {
 
-      const { newConsultationEvent } = action.payload as { newConsultationEvent: ConsultationEvent }
+      const { newConsultationEvents } = action.payload as { newConsultationEvents: ConsultationEvent[] }
 
       if (!state.dateRange)
         return state
 
-      return (
-        isDateContained(state.dateRange.startDate, state.dateRange.endDate, newConsultationEvent.startTime) ||
-        isDateContained(state.dateRange.startDate, state.dateRange.endDate, newConsultationEvent.endTime)
-      ) ?
-        {
+      const eventsToAdd = newConsultationEvents.filter(consultationEvent => (
+        isDateContained(state.dateRange!.startDate, state.dateRange!.endDate, consultationEvent.startTime) ||
+        isDateContained(state.dateRange!.startDate, state.dateRange!.endDate, consultationEvent.endTime)
+      ))
+
+      return  {
           consultationsEvents: [
             ...state.consultationsEvents,
-            newConsultationEvent
+            ...eventsToAdd
           ],
           dateRange: state.dateRange
         } 
-        : state
 
     }
 

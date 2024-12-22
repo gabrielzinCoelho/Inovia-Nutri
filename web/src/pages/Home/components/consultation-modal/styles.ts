@@ -77,6 +77,27 @@ export const ConsultationForm = styled('form')(() => ({
 
 }))
 
+export const RecurrenceRadioContainer = styled('div')(() => ({
+
+  display: 'flex',
+  gap: '2rem',
+  marginBottom: '-1rem',
+  alignItems: 'center',
+  justifyContent: 'flex-end'
+
+}))
+
+
+export const RecurrenceSettingsContainer = styled('div')(() => ({
+
+  display: 'flex',
+  width: '100%',
+  gap: '2rem',
+  alignItems: 'flex-start',
+  marginBottom: '-1rem'
+
+}))
+
 export const NutritionistData = styled('div')(({theme}) => ({
 
   width: '100%',

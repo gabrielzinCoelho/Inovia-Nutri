@@ -1,14 +1,18 @@
-import { ButtonsContainer, ClientData, CloseButton, ConsultationForm, Content, ContentBody, ContentHeader, NutritionistData } from "./styles";
-import { WatchLater } from "@mui/icons-material";
-import { Dialog, InputAdornment, MenuItem, Portal, TextField } from "@mui/material";
+import { ButtonsContainer, ClientData, CloseButton, ConsultationForm, Content, ContentBody, ContentHeader, NutritionistData, RecurrenceRadioContainer, RecurrenceSettingsContainer } from "./styles";
+import { EventRepeat, WatchLater } from "@mui/icons-material";
+import { Dialog, FormControlLabel, FormLabel, InputAdornment, MenuItem, Portal, Radio, RadioGroup, TextField } from "@mui/material";
 import { ReactNode, useContext } from "react";
 import dayjs from "dayjs";
 import CloseIcon from '@mui/icons-material/Close';
 import { ConsultationModalContext } from "../../contexts/consultation-modal-context";
 
+function dateToString(date: Date, dateFormat = 'YYYY-MM-DDTHH:mm'): string {
+  return dayjs(date).format(dateFormat)
+}
+
 interface TextFieldProps<T> {
 
-  value?: T | null,
+  value: T | null,
   onChange?: (newValue: T) => void,
 }
 
@@ -27,7 +31,10 @@ interface ConsultationModalProps {
     nutritionist: SelectProps<string>,
     client: SelectProps<string>,
     startTime: TextFieldProps<Date>,
-    duration: TextFieldProps<string>
+    duration: TextFieldProps<string>,
+    isRecurrent: TextFieldProps<boolean>,
+    recurrenceInterval: TextFieldProps<string>,
+    recurrenceEndDate: TextFieldProps<Date>
   },
   nutritionist: {
     name: TextFieldProps<string>,
@@ -56,8 +63,8 @@ export function ConsultationModal({
   const { closeModal, modalState } = useContext(ConsultationModalContext)
 
   return (
-    <Dialog 
-      open={modalState.isOpen} 
+    <Dialog
+      open={modalState.isOpen}
       onClose={closeModal}
     >
       <Portal>
@@ -79,7 +86,7 @@ export function ConsultationModal({
                 disabled={!isEditable}
                 value={consultation.nutritionist.value}
                 onChange={(e) => (consultation.nutritionist.onChange?.(e.target.value))}
-                slotProps={{ 
+                slotProps={{
                   inputLabel: { shrink: true },
                   select: {
                     MenuProps: {
@@ -87,7 +94,7 @@ export function ConsultationModal({
                         zIndex: '2000'
                       }
                     }
-                  } 
+                  }
                 }}
                 select
               >
@@ -103,7 +110,7 @@ export function ConsultationModal({
                 disabled={!isEditable}
                 value={consultation.client.value}
                 onChange={(e) => (consultation.client.onChange?.(e.target.value))}
-                slotProps={{ 
+                slotProps={{
                   inputLabel: { shrink: true },
                   select: {
                     MenuProps: {
@@ -111,7 +118,7 @@ export function ConsultationModal({
                         zIndex: '2002'
                       }
                     }
-                  } 
+                  }
                 }}
                 select
               >
@@ -127,7 +134,7 @@ export function ConsultationModal({
                 disabled={!isEditable}
                 type="datetime-local"
                 slotProps={{ inputLabel: { shrink: true } }}
-                value={dayjs(consultation.startTime.value).format("YYYY-MM-DDTHH:mm")}
+                value={consultation.startTime.value ? dateToString(consultation.startTime.value) : ''}
                 onChange={(e) => (consultation.startTime.onChange?.(new Date(e.target.value)))}
               />
               <TextField
@@ -146,15 +153,78 @@ export function ConsultationModal({
                 disabled={!isEditable}
                 value={consultation.duration.value}
                 onChange={(e) => {
-                  if(!e.target.value || e.target.value === '-')
+                  if (e.target.value === '')
                     consultation.duration.onChange?.('')
                   else {
                     const value = parseInt(e.target.value, 10);
-                    if(!isNaN(value))
+                    if (!isNaN(value) && value >= 1)
                       consultation.duration.onChange?.(e.target.value)
                   }
                 }}
               />
+              <RecurrenceRadioContainer>
+                <FormLabel id="recurrence-radio">Possui recorrência?</FormLabel>
+                <RadioGroup
+                  row
+                  aria-labelledby="recurrence-radio"
+                  value={consultation.isRecurrent.value ? 'yes' : 'no'}
+                  onChange={(e) => (consultation.isRecurrent.onChange?.(e.target.value === 'yes'))}
+                >
+                  <FormControlLabel value="yes" control={<Radio disabled={modalState.modalSelected !== 'CREATE'} />} label="Sim" />
+                  <FormControlLabel value="no" control={<Radio disabled={modalState.modalSelected !== 'CREATE'} />} label="Não" />
+                </RadioGroup>
+              </RecurrenceRadioContainer>
+              {
+                consultation.isRecurrent.value && (
+                  <RecurrenceSettingsContainer>
+                    <TextField
+                      label="Intervalo entre as consultas (dias)"
+                      slotProps={{
+                        input: {
+                          endAdornment: (
+                            <InputAdornment position="end">
+                              <EventRepeat />
+                            </InputAdornment>
+                          ),
+                        },
+                        inputLabel: { shrink: true },
+                      }}
+                      variant="filled"
+                      disabled={modalState.modalSelected !== 'CREATE'}
+                      value={consultation.recurrenceInterval.value}
+                      onChange={(e) => {
+                        if (e.target.value === '')
+                          consultation.recurrenceInterval.onChange?.('')
+                        else {
+                          const value = parseInt(e.target.value, 10);
+                          if (!isNaN(value) && value >= 1)
+                            consultation.recurrenceInterval.onChange?.(e.target.value)
+                        }
+                      }}
+                    />
+                    <TextField
+                      sx={{ flex: 1 }}
+                      label="Repetição até:"
+                      variant="filled"
+                      disabled={!consultation.startTime.value || modalState.modalSelected !== 'CREATE'}
+                      type="date"
+                      slotProps={{
+                        inputLabel: { shrink: true },
+                        htmlInput: { 
+                          min: consultation.startTime.value ? 
+                            dateToString(dayjs(consultation.startTime.value).add(1, 'day').toDate(), 'YYYY-MM-DD') 
+                            : 
+                            undefined 
+                        }
+                      }}
+                      value={consultation.recurrenceEndDate.value ? dateToString(consultation.recurrenceEndDate.value, 'YYYY-MM-DD') : ''}
+                      onChange={(e) => (
+                        consultation.recurrenceEndDate.onChange?.(dayjs(e.target.value).toDate())
+                      )}
+                    />
+                  </RecurrenceSettingsContainer>
+                )
+              }
             </ConsultationForm>
             <NutritionistData>
               <h3>Nutricionista</h3>
@@ -204,7 +274,7 @@ export function ConsultationModal({
                   variant="filled"
                   disabled
                   type='datetime-local'
-                  value={dayjs(client.dateOfBirth.value).format("YYYY-MM-DDTHH:mm")}
+                  value={client.dateOfBirth.value ? dateToString(client.dateOfBirth.value) : ''}
                   slotProps={{ inputLabel: { shrink: true } }}
                 />
                 <TextField

@@ -1,4 +1,6 @@
+import { IsOptional } from '@nestjs/class-validator'
 import {
+  BadRequestException,
   Body,
   Controller,
   HttpCode,
@@ -11,7 +13,9 @@ import { ApiProperty, ApiResponse, ApiTags } from '@nestjs/swagger'
 import { IsInt, IsNotEmpty, Min } from 'class-validator'
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard'
 import { CreateConsultationService } from 'src/services/create-consultation.service'
+import { CreateRecurrentConsultationService } from 'src/services/create-recurrent-consultation.service'
 import { CreateConsultationApiResponse } from 'src/swagger/consultations/create-consultation-api'
+import { IsAfterThan } from 'src/validator/is-after-than.validor'
 import { IsValidObjectId } from 'src/validator/object-id.validator'
 
 class CreateConsultationDto {
@@ -34,12 +38,26 @@ class CreateConsultationDto {
   @IsNotEmpty()
   @IsValidObjectId()
   clientId: string
+
+  @ApiProperty({ example: 'test' })
+  @IsOptional()
+  @IsAfterThan('startTime')
+  recurrenceEndTime: Date
+
+  @ApiProperty({ example: 'test' })
+  @IsInt()
+  @Min(1)
+  @IsOptional()
+  recurrenceInterval: number
 }
 
 @ApiTags('Consultas')
 @Controller('/consultations')
 export class CreateConsultationController {
-  constructor(private createConsultationService: CreateConsultationService) {}
+  constructor(
+    private createConsultationService: CreateConsultationService,
+    private createRecurrentConsultationService: CreateRecurrentConsultationService,
+  ) {}
 
   @Post()
   @HttpCode(201)
@@ -47,7 +65,34 @@ export class CreateConsultationController {
   @ApiResponse(CreateConsultationApiResponse)
   @UseGuards(JwtAuthGuard)
   async handle(@Body() body: CreateConsultationDto) {
-    const { startTime, durationInMinutes, nutritionistId, clientId } = body
+    const {
+      startTime,
+      durationInMinutes,
+      nutritionistId,
+      clientId,
+      recurrenceEndTime,
+      recurrenceInterval,
+    } = body
+
+    if (recurrenceEndTime && recurrenceInterval) {
+      const intervalBetweenRecurrentConsultationsInMinutes =
+        recurrenceInterval * 24 * 60
+
+      if (intervalBetweenRecurrentConsultationsInMinutes < durationInMinutes)
+        throw new BadRequestException('Recurrent consultations overlap.')
+
+      const consultations =
+        await this.createRecurrentConsultationService.execute({
+          startTime,
+          durationInMinutes,
+          nutritionistId,
+          clientId,
+          recurrenceEndTime,
+          recurrenceInterval,
+        })
+
+      return { consultations }
+    }
 
     const consultation = await this.createConsultationService.execute({
       startTime,
@@ -56,6 +101,6 @@ export class CreateConsultationController {
       clientId,
     })
 
-    return { consultation }
+    return { consultations: [consultation] }
   }
 }

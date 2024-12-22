@@ -12,7 +12,10 @@ interface ConsultationData {
   startTime: Date | null,
   duration: number | null,
   nutritionistId: string | null,
-  clientId: string | null
+  clientId: string | null,
+  isRecurrent: boolean,
+  recurrenceInterval: number | null,
+  recurrenceEndDate: Date | null,
 }
 
 interface NutritionistData {
@@ -39,7 +42,7 @@ export function CreateConsultation() {
   const { token: userToken } = useAppSelector(store => store.auth)
   const { showAlert } = useContext(AlertContext)
   const { closeModal } = useContext(ConsultationModalContext)
-  const { addCalendarEvent } = useContext(CalendarEventsContext)
+  const { addCalendarEvents } = useContext(CalendarEventsContext)
 
   const [nutritionistsData, setNutritionistsData] = useState<Map<string, NutritionistData>>(new Map())
   const [clientsData, setClientsData] = useState<Map<string, ClientData>>(new Map())
@@ -48,7 +51,10 @@ export function CreateConsultation() {
     startTime: null,
     duration: null,
     nutritionistId: null,
-    clientId: null
+    clientId: null,
+    isRecurrent: false,
+    recurrenceInterval: null,
+    recurrenceEndDate: null,
   })
 
   async function handleCreateConsultation() {
@@ -56,7 +62,8 @@ export function CreateConsultation() {
       !consultationData.clientId ||
       !consultationData.nutritionistId ||
       !consultationData.startTime ||
-      !consultationData.duration
+      !consultationData.duration ||
+      (consultationData.isRecurrent && (!consultationData.recurrenceInterval || !consultationData.recurrenceEndDate))
     ) {
       showAlert(
         "Falha no envio",
@@ -73,7 +80,9 @@ export function CreateConsultation() {
           startTime: consultationData.startTime,
           durationInMinutes: consultationData.duration,
           nutritionistId: consultationData.nutritionistId,
-          clientId: consultationData.clientId
+          clientId: consultationData.clientId,
+          recurrenceEndTime: consultationData.recurrenceEndDate,
+          recurrenceInterval: consultationData.recurrenceInterval
         },
         {
           headers: { "Authorization": `Bearer ${userToken}` }
@@ -83,7 +92,7 @@ export function CreateConsultation() {
       if (response.status !== 201)
         throw new Error("Create consultation request Failed.")
 
-      const newConsultationData = response.data.consultation
+      const newConsultationData = response.data.consultations
 
       showAlert(
         "Sucesso",
@@ -91,16 +100,17 @@ export function CreateConsultation() {
         "success"
       )
       closeModal()
-      addCalendarEvent({
-        id: newConsultationData._id,
+      //eslint-disable-next-line
+      addCalendarEvents(newConsultationData.map((consultation : any) => ({
+        id: consultation._id,
         nutritionist: {
-          id: newConsultationData.nutritionist._id,
-          name: newConsultationData.nutritionist.name
+          id: consultation.nutritionist._id,
+          name: consultation.nutritionist.name
         },
-        client: newConsultationData.client.name,
-        startTime: newConsultationData.start_time,
-        endTime: newConsultationData.end_time
-      })
+        client: consultation.client.name,
+        startTime: consultation.start_time,
+        endTime: consultation.end_time
+      })))
 
     
       //eslint-disable-next-line
@@ -230,34 +240,59 @@ export function CreateConsultation() {
             ...prev,
             duration: newDuration === '' ? null : parseInt(newDuration)
           })))
+        },
+        isRecurrent: {
+          value: consultationData.isRecurrent,
+          onChange: (isRecurrent) => (setConsultationData((prev) => ({
+            ...prev,
+            isRecurrent,
+            recurrenceInterval: null,
+            recurrenceEndDate: null
+          })))
+        },
+        recurrenceInterval: {
+          value: consultationData.recurrenceInterval?.toString() ?? '',
+          onChange: (newRecurrenceInterval) => (setConsultationData((prev) => ({
+            ...prev,
+            recurrenceInterval: newRecurrenceInterval === '' ? null : parseInt(newRecurrenceInterval)
+          }))) 
+        },
+        recurrenceEndDate: {
+          value: consultationData.recurrenceEndDate,
+          onChange: (newDate) => {
+            setConsultationData((prev) => ({
+              ...prev,
+              recurrenceEndDate: newDate
+            }))
+          }
         }
       }}
       nutritionist={{
         name: {
-          value: consultationData.nutritionistId ? nutritionistsData.get(consultationData.nutritionistId)?.name : ''
+          value: consultationData.nutritionistId ? nutritionistsData.get(consultationData.nutritionistId)!.name : ''
         },
         email: {
-          value: consultationData.nutritionistId ? nutritionistsData.get(consultationData.nutritionistId)?.email : ''
+          value: consultationData.nutritionistId ? nutritionistsData.get(consultationData.nutritionistId)!.email : ''
         }
       }}
       client={{
         name: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.name : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.name : ''
         },
         biotype: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.biotype : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.biotype : ''
         },
         cpf: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.cpf : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.cpf : ''
         },
         dateOfBirth: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.dateOfBirth : null
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.dateOfBirth : null
         },
         email: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.email : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.email : ''
         },
         phone: {
-          value: consultationData.clientId ? clientsData.get(consultationData.clientId)?.phone : ''
+          value: consultationData.clientId ? clientsData.get(consultationData.clientId)!.phone : ''
         },
       }}
     >

@@ -15,6 +15,8 @@ interface ConsultationData {
   id: string,
   startTime: Date,
   duration: number,
+  recurrenceInterval: number | null,
+  recurrenceEndData: Date | null,
   nutritionist: {
     name: string,
     email: string,
@@ -70,6 +72,8 @@ export function ShowConsultation() {
         id: consultationResponse._id,
         startTime: consultationResponse.start_time,
         duration: dayjs(consultationResponse.end_time).diff(dayjs(consultationResponse.start_time), 'minutes'),
+        recurrenceEndData: consultationResponse.recurrence_end_time ?? null,
+        recurrenceInterval: consultationResponse.recurrence_interval ?? null,
         nutritionist: {
           name: consultationResponse.nutritionist.name,
           email: consultationResponse.nutritionist.email,
@@ -97,24 +101,33 @@ export function ShowConsultation() {
         title={"Detalhes da Consulta"}
         consultation={{
           nutritionist: {
-            value: consultationData?.nutritionist.name,
+            value: consultationData.nutritionist.name,
             options: [{
-              value: consultationData?.nutritionist.name,
-              label: `${consultationData?.nutritionist.name} (${consultationData?.nutritionist.email})`
+              value: consultationData.nutritionist.name,
+              label: `${consultationData.nutritionist.name} (${consultationData.nutritionist.email})`
             }]
           },
           client:{
-            value: consultationData?.client.name,
+            value: consultationData.client.name,
             options: [{
-              value: consultationData?.client.name,
-              label: `${consultationData?.client.name} (${consultationData?.client.cpf})`
+              value: consultationData.client.name,
+              label: `${consultationData.client.name} (${consultationData.client.cpf})`
             }]
           },
           startTime: {
             value: consultationData.startTime
           },
           duration: {
-            value: consultationData.duration?.toString() ?? '',
+            value: consultationData.duration.toString(),
+          },
+          isRecurrent: {
+            value: (!!consultationData.recurrenceInterval && !!consultationData.recurrenceEndData),
+          },
+          recurrenceInterval: {
+            value: consultationData.recurrenceInterval?.toString() ?? '' 
+          },
+          recurrenceEndDate: {
+            value: consultationData.recurrenceEndData
           }
         }}
         nutritionist={{
