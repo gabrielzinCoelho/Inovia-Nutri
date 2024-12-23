@@ -5,31 +5,19 @@ export const FetchConsultationstApiResponse = {
     example: {
       consultations: [
         {
-          _id: '6761aae5fc6351925eba9880',
-          start_time: '2024-12-18T10:30:00.000Z',
-          end_time: '2024-12-18T11:30:00.000Z',
+          _id: '6769d0a8eab16deaf2a7ffbd',
+          start_time: '2024-12-29T21:05:00.000Z',
+          end_time: '2024-12-29T22:05:00.000Z',
           nutritionist: {
-            _id: '6761aacffc6351925eba987a',
-            name: 'John Doe',
+            _id: '6769b7004ab000bd0e461579',
+            name: 'Richard Stoltenberg',
           },
           client: {
-            _id: '6761aaac9e618aa08732edb3',
-            name: 'Noel Bergstrom',
+            _id: '6769b7014ab000bd0e461585',
+            name: 'Dr. Malcolm Schmidt',
           },
-          __v: 0,
-        },
-        {
-          _id: '6761aaf5fc6351925eba9886',
-          start_time: '2024-12-17T10:30:00.000Z',
-          end_time: '2024-12-17T11:00:00.000Z',
-          nutritionist: {
-            _id: '6761aacffc6351925eba987a',
-            name: 'John Doe',
-          },
-          client: {
-            _id: '6761aaac9e618aa08732edb4',
-            name: 'Shelia Lueilwitz',
-          },
+          recurrence_interval: 7,
+          recurrence_end_time: '2025-01-16T23:59:59.999Z',
           __v: 0,
         },
       ],

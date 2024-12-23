@@ -39,12 +39,12 @@ class CreateConsultationDto {
   @IsValidObjectId()
   clientId: string
 
-  @ApiProperty({ example: 'test' })
+  @ApiProperty({ required: false, example: '2024-12-31T20:30:00.000Z' })
   @IsOptional()
   @IsAfterThan('startTime')
   recurrenceEndTime: Date
 
-  @ApiProperty({ example: 'test' })
+  @ApiProperty({ required: false, example: '7' })
   @IsInt()
   @Min(1)
   @IsOptional()
