@@ -1,0 +1,40 @@
+services:
+  inovia-nutri-mongo:
+    image: 'bitnami/mongodb:latest'
+    container_name: inovia-nutri-mongo
+    ports:
+      - 27017:27017
+    environment:
+      - MONGODB_ROOT_USER=root
+      - MONGODB_ROOT_PASSWORD=root
+    volumes:
+      - ./backend/mongo-data:/bitnami/mongodb
+    networks:
+      - app-network
+    
+  inovia-nutri-backend:
+    build:
+      context: ./backend
+    container_name: inovia-nutri-backend
+    ports:
+      - 3333:3333
+    depends_on:
+      - inovia-nutri-mongo
+    networks:
+      - app-network
+  
+  inovia-nutri-web:
+    build:
+      context: ./web
+    container_name: inovia-nutri-web
+    ports:
+      - 8080:8080
+    depends_on:
+      - inovia-nutri-backend
+    networks:
+      - app-network
+
+
+networks:
+  app-network:
+    driver: bridge

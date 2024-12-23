@@ -1,7 +1,7 @@
 services:
   inovia-nutri-mongo:
     image: 'bitnami/mongodb:latest'
-    container_name: inovia-nutri-mongo
+    container_name: inovia-nutri-mongo-db
     ports:
       - 27017:27017
     environment:

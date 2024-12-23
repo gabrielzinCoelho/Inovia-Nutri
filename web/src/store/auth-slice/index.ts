@@ -32,9 +32,9 @@ interface AuthState {
   token: string | null,
 }
 
-const initialState = {
+const initialState : AuthState = {
   token: await getStoredToken()
-} as AuthState
+}
 
 export const authSlice = createSlice({
   name: 'auth',
