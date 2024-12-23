@@ -117,7 +117,7 @@ inovia-nutri-mongo:
 
 ## Povoamento do banco de dados
 
-Na execução da aplicação via docker, o script de povoamento do banco de dados é executado de forma automática. Sendo assim, para fazer o login na aplicação, é possível utilizar as credenciais <code>johndoe@example.com<code> e <code>12345<code> (login e senha, respectivamente).
+Na execução da aplicação via docker, o script de povoamento do banco de dados é executado de forma automática. Sendo assim, para fazer o login na aplicação, é possível utilizar as credenciais <code>johndoe@example.com</code> e <code>12345</code> (login e senha, respectivamente).
 
 Para executar o script de forma manual, basta realizar os seguintes comandos a partir do diretório raiz:
 
